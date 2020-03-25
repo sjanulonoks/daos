@@ -1989,7 +1989,7 @@ obj_ec_stripe_list_init(struct obj_reasb_req *reasb_req)
 	for (i = 0; i < iod_nr; i++) {
 		stripe_list = &stripe_lists[i];
 		recx_list = &recx_lists[i];
-		D_ASSERT(recx_list->re_ep_valid);
+		D_ASSERTF(recx_list->re_ep_valid, "recx_list %p", recx_list);
 		stripe_list->re_ep_valid = 1;
 		iod = &iods[i];
 		if (iod->iod_type == DAOS_IOD_SINGLE) {
@@ -2566,4 +2566,69 @@ obj_ec_tgt_oiod_init(struct obj_io_desc *r_oiods, uint32_t iod_nr,
 	}
 
 	return tgt_oiods;
+}
+
+/* Get all of recxs of the specific target from the daos offset */
+int
+obj_recx_ec2_daos(struct daos_oclass_attr *oca, int shard,
+		  daos_recx_t *recxs, int nr, daos_recx_t **output_recxs,
+		  int *output_nr)
+{
+	daos_recx_t *tgt_recxs;
+	int cell_bytes = obj_ec_cell_rec_nr(oca);
+	int stripe_bytes = obj_ec_stripe_rec_nr(oca);
+	int tgt_idx;
+	int total = 0;
+	int idx = 0;
+	int i;
+
+	if (oca->ca_resil == DAOS_RES_REPL)
+		return 0;
+
+	tgt_idx = shard % obj_ec_tgt_nr(oca);
+	/* parity shard conversion */
+	if (tgt_idx >= obj_ec_data_tgt_nr(oca)) {
+		for (i = 0; i < nr; i++) {
+			daos_off_t offset = recxs[i].rx_idx;
+
+			if (!(offset & PARITY_INDICATOR))
+				continue;
+			recxs[i].rx_idx = obj_ec_parity_off_to_daos_off(offset,
+						cell_bytes, stripe_bytes);
+			recxs[i].rx_nr *= obj_ec_data_tgt_nr(oca);
+		}
+		*output_recxs = recxs;
+		*output_nr = nr;
+		return 0;
+	}
+
+	/* data shard conversion */
+	*output_nr = 0;
+	for (i = 0; i < nr; i++)
+		total += (recxs[i].rx_nr + cell_bytes - 1) / cell_bytes;
+
+	D_ALLOC_ARRAY(tgt_recxs, total);
+	if (tgt_recxs == NULL)
+		return -DER_NOMEM;
+
+	for (i = 0; i < nr; i++) {
+		daos_off_t cur_off = recxs[i].rx_idx;
+		daos_off_t cur_end = cur_off + recxs[i].rx_nr;
+
+		while (cur_off < cur_end) {
+			daos_off_t offset = cur_off;
+
+			offset = obj_ec_idx_vos2daos(offset, stripe_bytes,
+						     cell_bytes, tgt_idx);
+			tgt_recxs[idx].rx_nr = min(cur_end - cur_off,
+						   cell_bytes);
+			tgt_recxs[idx].rx_idx = offset;
+			cur_off += cell_bytes;
+			idx++;
+		}
+	}
+
+	*output_nr = total;
+	*output_recxs = tgt_recxs;
+	return 0;
 }
