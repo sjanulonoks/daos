@@ -6,7 +6,7 @@
 
 Name:          daos
 Version:       1.1.0
-Release:       25%{?relval}%{?dist}
+Release:       26%{?relval}%{?dist}
 Summary:       DAOS Storage Engine
 
 License:       Apache
@@ -206,6 +206,7 @@ mkdir -p %{?buildroot}/%{_unitdir}
 install -m 644 utils/systemd/%{server_svc_name} %{?buildroot}/%{_unitdir}
 install -m 644 utils/systemd/%{agent_svc_name} %{?buildroot}/%{_unitdir}
 mkdir -p %{?buildroot}/%{conf_dir}/certs/clients
+mv %{?buildroot}/%{_prefix}/etc/bash_completion.d %{?buildroot}/%{_sysconfdir}
 
 %pre server
 getent group daos_admins >/dev/null || groupadd -r daos_admins
@@ -248,6 +249,8 @@ getent passwd daos_server >/dev/null || useradd -M daos_server
 %dir %{_prefix}%{_sysconfdir}
 %{_prefix}%{_sysconfdir}/vos_dfs_sample.yaml
 %{_prefix}%{_sysconfdir}/vos_size_input.yaml
+%dir %{_sysconfdir}/bash_completion.d
+%{_sysconfdir}/bash_completion.d/daos.bash
 %{_libdir}/libdaos_common.so
 # TODO: this should move from daos_srv to daos
 %{_libdir}/daos_srv/libplacement.so
@@ -362,6 +365,9 @@ getent passwd daos_server >/dev/null || useradd -M daos_server
 %{_libdir}/*.a
 
 %changelog
+* Thu Jun 25 2020 Michael MacDonald <mjmac.macdonald@intel.com> 1.1.0-26
+- Install completion script in /etc/bash_completion.d
+
 * Tue Jun 23 2020 Jeff Olivier <jeffrey.v.olivier@intel.com> - 1.1.0-25
 - Add -no-rpath option and use it for rpm build rather than modifying
   SCons files in place
