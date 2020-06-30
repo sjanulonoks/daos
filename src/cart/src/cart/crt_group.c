@@ -112,24 +112,16 @@ li_op_rec_addref(struct d_hash_table *hhtab, d_list_t *rlink)
 	struct crt_lookup_item *li = crt_li_link2ptr(rlink);
 
 	D_ASSERT(li->li_initialized);
-	D_MUTEX_LOCK(&li->li_mutex);
-	li->li_ref++;
-	D_MUTEX_UNLOCK(&li->li_mutex);
+	atomic_fetch_add(&li->li_ref, 1);
 }
 
 static bool
 li_op_rec_decref(struct d_hash_table *hhtab, d_list_t *rlink)
 {
-	uint32_t			 ref;
-	struct crt_lookup_item		*li = crt_li_link2ptr(rlink);
+	struct crt_lookup_item *li = crt_li_link2ptr(rlink);
 
 	D_ASSERT(li->li_initialized);
-	D_MUTEX_LOCK(&li->li_mutex);
-	li->li_ref--;
-	ref = li->li_ref;
-	D_MUTEX_UNLOCK(&li->li_mutex);
-
-	return ref == 0;
+	return atomic_fetch_sub(&li->li_ref, 1) == 1;
 }
 
 static void
@@ -189,23 +181,16 @@ rm_op_rec_addref(struct d_hash_table *hhtab, d_list_t *rlink)
 	struct crt_rank_mapping *rm = crt_rm_link2ptr(rlink);
 
 	D_ASSERT(rm->rm_initialized);
-	D_MUTEX_LOCK(&rm->rm_mutex);
-	rm->rm_ref++;
-	D_MUTEX_UNLOCK(&rm->rm_mutex);
+	atomic_fetch_add(&rm->rm_ref, 1);
 }
 
 static bool
 rm_op_rec_decref(struct d_hash_table *hhtab, d_list_t *rlink)
 {
-	uint32_t		ref;
-	struct crt_rank_mapping	*rm = crt_rm_link2ptr(rlink);
+	struct crt_rank_mapping *rm = crt_rm_link2ptr(rlink);
 
 	D_ASSERT(rm->rm_initialized);
-	D_MUTEX_LOCK(&rm->rm_mutex);
-	ref = --rm->rm_ref;
-	D_MUTEX_UNLOCK(&rm->rm_mutex);
-
-	return ref == 0;
+	return atomic_fetch_sub(&rm->rm_ref, 1) == 1;
 }
 
 static void
@@ -215,7 +200,6 @@ crt_rm_destroy(struct crt_rank_mapping *rm)
 	D_ASSERT(rm->rm_ref == 0);
 	D_ASSERT(rm->rm_initialized == 1);
 
-	D_MUTEX_DESTROY(&rm->rm_mutex);
 	D_FREE(rm);
 }
 
@@ -267,25 +251,16 @@ ui_op_rec_addref(struct d_hash_table *hhtab, d_list_t *rlink)
 	struct crt_uri_item *ui = crt_ui_link2ptr(rlink);
 
 	D_ASSERT(ui->ui_initialized);
-	D_MUTEX_LOCK(&ui->ui_mutex);
-	ui->ui_ref++;
-	D_MUTEX_UNLOCK(&ui->ui_mutex);
+	atomic_fetch_add(&ui->ui_ref, 1);
 }
 
 static bool
 ui_op_rec_decref(struct d_hash_table *hhtab, d_list_t *rlink)
 {
-	uint32_t		ref;
-	struct crt_uri_item	*ui = crt_ui_link2ptr(rlink);
+	struct crt_uri_item *ui = crt_ui_link2ptr(rlink);
 
 	D_ASSERT(ui->ui_initialized);
-	D_MUTEX_LOCK(&ui->ui_mutex);
-	ui->ui_ref--;
-	ref = ui->ui_ref;
-
-	D_MUTEX_UNLOCK(&ui->ui_mutex);
-
-	return ref == 0;
+	return atomic_fetch_sub(&ui->ui_ref, 1) == 1;
 }
 
 static void
@@ -302,7 +277,6 @@ crt_ui_destroy(struct crt_uri_item *ui)
 			D_FREE(ui->ui_uri[i]);
 	}
 
-	D_MUTEX_DESTROY(&ui->ui_mutex);
 	D_FREE_PTR(ui);
 }
 
@@ -332,7 +306,7 @@ grp_li_uri_get(struct crt_lookup_item *li, int tag)
 	ui = crt_ui_link2ptr(rlink);
 	d_hash_rec_decref(&grp_priv->gp_uri_lookup_cache, rlink);
 
-	return ui->ui_uri[tag];
+	return atomic_load_relaxed(&ui->ui_uri[tag]);
 }
 
 static inline int
@@ -341,6 +315,8 @@ grp_li_uri_set(struct crt_lookup_item *li, int tag, const char *uri)
 	struct crt_uri_item	*ui;
 	d_list_t		*rlink;
 	struct crt_grp_priv	*grp_priv;
+	crt_phy_addr_t		nul_str = NULL;
+	crt_phy_addr_t		uri_dup;
 	d_rank_t		rank;
 	int			rc = 0;
 
@@ -351,22 +327,18 @@ grp_li_uri_set(struct crt_lookup_item *li, int tag, const char *uri)
 				(void *)&rank, sizeof(rank));
 	if (rlink == NULL) {
 		D_ALLOC_PTR(ui);
-		if (!ui) {
-			D_ERROR("Failed to allocate uri item\n");
+		if (!ui)
 			D_GOTO(exit, rc = -DER_NOMEM);
-		}
 
 		D_INIT_LIST_HEAD(&ui->ui_link);
 		ui->ui_ref = 0;
 		ui->ui_initialized = 1;
-
-		rc = D_MUTEX_INIT(&ui->ui_mutex, NULL);
-		if (rc != 0) {
-			D_FREE_PTR(ui);
-			D_GOTO(exit, rc);
-		}
-
 		ui->ui_rank = li->li_rank;
+		D_STRNDUP(ui->ui_uri[tag], uri, CRT_ADDR_STR_MAX_LEN);
+		if (!ui->ui_uri[tag]) {
+			D_FREE_PTR(ui);
+			D_GOTO(exit, rc = -DER_NOMEM);
+		}
 
 		rc = d_hash_rec_insert(&grp_priv->gp_uri_lookup_cache,
 				&rank, sizeof(rank),
@@ -374,26 +346,21 @@ grp_li_uri_set(struct crt_lookup_item *li, int tag, const char *uri)
 				true /* exclusive */);
 		if (rc != 0) {
 			D_ERROR("Entry already present\n");
-			D_MUTEX_DESTROY(&ui->ui_mutex);
+			D_FREE(ui->ui_uri[tag]);
 			D_FREE_PTR(ui);
 			D_GOTO(exit, rc);
 		}
-		D_STRNDUP(ui->ui_uri[tag], uri, CRT_ADDR_STR_MAX_LEN);
-
-		if (!ui->ui_uri[tag]) {
-			d_hash_rec_delete(&grp_priv->gp_uri_lookup_cache,
-					&rank, sizeof(d_rank_t));
-			D_GOTO(exit, rc = -DER_NOMEM);
-		}
 	} else {
 		ui = crt_ui_link2ptr(rlink);
-		if (!ui->ui_uri[tag]) {
-			D_STRNDUP(ui->ui_uri[tag], uri, CRT_ADDR_STR_MAX_LEN);
-		}
-
-		if (!ui->ui_uri[tag]) {
-			D_ERROR("Failed to strndup uri string\n");
-			rc = -DER_NOMEM;
+		if (ui->ui_uri[tag] == NULL) {
+			D_STRNDUP(uri_dup, uri, CRT_ADDR_STR_MAX_LEN);
+			if (uri_dup) {
+				if (!atomic_compare_exchange(&ui->ui_uri[tag],
+							     nul_str, uri_dup))
+					D_FREE(uri_dup);
+			} else {
+				rc = -DER_NOMEM;
+			}
 		}
 
 		d_hash_rec_decref(&grp_priv->gp_uri_lookup_cache, rlink);
@@ -475,6 +442,7 @@ free_htables:
 			D_ERROR("d_hash_table_destroy failed, rc: %d.\n", rc2);
 	}
 	D_FREE(htables);
+	grp_priv->gp_lookup_cache = NULL;
 
 out:
 	if (rc != 0)
@@ -670,7 +638,7 @@ crt_grp_lc_uri_insert(struct crt_grp_priv *passed_grp_priv, int ctx_idx,
 		rc = grp_lc_uri_insert_internal_locked(grp_priv, ctx_idx, rank,
 						tag, uri);
 		if (rc != 0) {
-			D_ERROR("Insertion failed for ctx_idx=%d\n", ctx_idx);
+			D_ERROR("Insertion failed: rc %d\n", rc);
 			D_GOTO(unlock, rc);
 		}
 	}
@@ -2677,7 +2645,6 @@ crt_rank_uri_get(crt_group_t *group, d_rank_t rank, int tag, char **uri_str)
 
 	D_STRNDUP(*uri_str, uri, strlen(uri) + 1);
 	if (!(*uri_str)) {
-		D_ERROR("Failed to allocate uri string\n");
 		D_GOTO(out, rc = -DER_NOMEM);
 	}
 
@@ -3035,7 +3002,6 @@ crt_group_secondary_create(crt_group_id_t grp_name, crt_group_t *primary_grp,
 	/* Record secondary group in the primary group */
 	D_ALLOC_PTR(entry);
 	if (entry == NULL) {
-		D_ERROR("Failed to allocate entry for group\n");
 		D_GOTO(out, rc = -DER_NOMEM);
 	}
 
@@ -3135,7 +3101,6 @@ static struct crt_rank_mapping *
 crt_rank_mapping_init(d_rank_t key, d_rank_t value)
 {
 	struct crt_rank_mapping *rm;
-	int			rc;
 
 	D_ALLOC_PTR(rm);
 	if (!rm) {
@@ -3144,17 +3109,10 @@ crt_rank_mapping_init(d_rank_t key, d_rank_t value)
 	}
 
 	D_INIT_LIST_HEAD(&rm->rm_link);
-	rm->rm_ref = 0;
-	rm->rm_initialized = 1;
-
-	rc = D_MUTEX_INIT(&rm->rm_mutex, NULL);
-	if (rc != 0) {
-		D_FREE_PTR(rm);
-		D_GOTO(out, rm = NULL);
-	}
-
 	rm->rm_key = key;
 	rm->rm_value = value;
+	rm->rm_ref = 0;
+	rm->rm_initialized = 1;
 
 out:
 	return rm;
@@ -3339,7 +3297,6 @@ crt_group_mod_get(d_rank_list_t *grp_membs, d_rank_list_t *mod_membs,
 	/* Array will have at most 'mod_membs' elements */
 	D_ALLOC_ARRAY(idx_to_add, mod_membs->rl_nr);
 	if (!idx_to_add) {
-		D_ERROR("Failed to allocate array\n");
 		D_GOTO(cleanup, rc = -DER_NOMEM);
 	}
 

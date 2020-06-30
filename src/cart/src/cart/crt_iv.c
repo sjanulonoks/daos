@@ -89,7 +89,7 @@ struct iv_fetch_cb_info {
 	/* Local bulk handle for iv value */
 	crt_bulk_t			 ifc_bulk_hdl;
 
-	/* Optional child's rpc and childs bulk handle, if child exists */
+	/* Optional child's rpc and child's bulk handle, if child exists */
 	crt_rpc_t			*ifc_child_rpc;
 	crt_bulk_t			 ifc_child_bulk;
 
@@ -115,7 +115,7 @@ struct pending_fetch {
 	d_list_t			 pf_link;
 };
 
-/* Struture for list of all pending fetches for given key */
+/* Structure for list of all pending fetches for given key */
 struct ivf_key_in_progress {
 	crt_iv_key_t	kip_key;
 	d_list_t	kip_pending_fetch_list;
@@ -1375,7 +1375,7 @@ crt_hdlr_iv_fetch_aux(void *arg)
 
 		rc = iv_ops->ivo_on_put(ivns_internal, &iv_value, user_priv);
 		if (rc != 0) {
-			D_ERROR("ivo_on_put() returend rc = %d\n", rc);
+			D_ERROR("ivo_on_put() returned rc = %d\n", rc);
 			D_GOTO(send_error, rc);
 		}
 
@@ -2040,7 +2040,7 @@ crt_iv_sync_corpc_pre_forward(crt_rpc_t *rpc, void *arg)
 	return rc;
 }
 
-/* Calback structure for iv sync RPC */
+/* Callback structure for iv sync RPC */
 struct iv_sync_cb_info {
 	/* Local bulk handle to free in callback */
 	crt_bulk_t			isc_bulk_hdl;
@@ -2623,7 +2623,7 @@ handle_response_cb(const struct crt_cb_info *cb_info)
 	D_ASSERT(rpc_priv != NULL);
 	crt_ctx = rpc_priv->crp_pub.cr_ctx;
 
-	if (crt_rpc_cb_customized(crt_ctx, &rpc_priv->crp_pub)) {
+	if (crt_ctx->cc_iv_resp_cb != NULL) {
 		int rc;
 		struct crt_cb_info *info;
 
@@ -2638,10 +2638,10 @@ handle_response_cb(const struct crt_cb_info *cb_info)
 		info->cci_rpc = cb_info->cci_rpc;
 		info->cci_rc = cb_info->cci_rc;
 		info->cci_arg = cb_info->cci_arg;
-		rc = crt_ctx->cc_rpc_cb((crt_context_t)crt_ctx,
-					 info,
-					 handle_response_cb_internal,
-					 crt_ctx->cc_rpc_cb_arg);
+		rc = crt_ctx->cc_iv_resp_cb((crt_context_t)crt_ctx,
+					    info,
+					    handle_response_cb_internal,
+					    crt_ctx->cc_rpc_cb_arg);
 		if (rc) {
 			D_WARN("rpc_cb failed %d, do cb directly\n", rc);
 			RPC_DECREF(rpc_priv);
@@ -3217,6 +3217,9 @@ crt_iv_update(crt_iv_namespace_t ivns, uint32_t class_id,
 		rc = -DER_INVAL;
 		update_comp_cb(ivns, class_id, iv_key, NULL, iv_value,
 			rc, cb_arg);
+
+		if (sync_type.ivs_comp_cb)
+			sync_type.ivs_comp_cb(sync_type.ivs_comp_cb_arg);
 		D_GOTO(exit, rc);
 	}
 

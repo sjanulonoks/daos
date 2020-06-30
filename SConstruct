@@ -65,7 +65,7 @@ def update_rpm_version(version, tag):
         if line.startswith("Version:"):
             current_version = line[line.rfind(' ')+1:].rstrip()
             if version < current_version:
-                print("You cannot create a new verison ({}) lower than the RPM "
+                print("You cannot create a new version ({}) lower than the RPM "
                       "spec file has currently ({})".format(version,
                                                             current_version))
                 return False
@@ -152,7 +152,7 @@ def preload_prereqs(prereqs):
     reqs = ['argobots', 'pmdk', 'cmocka', 'ofi', 'hwloc', 'mercury', 'boost',
             'uuid', 'crypto', 'fuse', 'protobufc']
     if not is_platform_arm():
-        reqs.extend(['spdk', 'isal'])
+        reqs.extend(['spdk', 'isal', 'isal_crypto'])
     prereqs.load_definitions(prebuild=reqs)
 
 def scons(): # pylint: disable=too-many-locals
@@ -405,6 +405,8 @@ def scons(): # pylint: disable=too-many-locals
     env.Install('$PREFIX/etc', ['utils/memcheck-daos-client.supp'])
     env.Install('$PREFIX/lib/daos/TESTING/ftest/util',
                 ['utils/sl/env_modules.py'])
+    env.Install('$PREFIX/lib/daos/TESTING/ftest/',
+                ['ftest.sh'])
 
     # install the configuration files
     SConscript('utils/config/SConscript')
@@ -417,6 +419,9 @@ def scons(): # pylint: disable=too-many-locals
 
     Default(build_prefix)
     Depends('install', build_prefix)
+
+    # an "rpms" target
+    env.Command('rpms', '', 'make -C utils/rpms rpms')
 
     try:
         #if using SCons 2.4+, provide a more complete help

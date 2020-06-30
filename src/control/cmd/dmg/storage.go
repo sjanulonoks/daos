@@ -28,9 +28,13 @@ import (
 	"os"
 	"strings"
 
-	mgmtpb "github.com/daos-stack/daos/src/control/common/proto/mgmt"
+	"github.com/dustin/go-humanize/english"
+	"github.com/pkg/errors"
+
+	"github.com/daos-stack/daos/src/control/common"
 	types "github.com/daos-stack/daos/src/control/common/storage"
 	"github.com/daos-stack/daos/src/control/lib/control"
+	"github.com/daos-stack/daos/src/control/system"
 )
 
 const (
@@ -152,24 +156,98 @@ type storageFormatCmd struct {
 	ctlInvokerCmd
 	hostListCmd
 	jsonOutputCmd
-	Verbose  bool `short:"v" long:"verbose" description:"Show results of each SCM & NVMe device format operation"`
-	Reformat bool `long:"reformat" description:"Always reformat storage (CAUTION: Potentially destructive)"`
+	Verbose  bool   `short:"v" long:"verbose" description:"Show results of each SCM & NVMe device format operation"`
+	Reformat bool   `long:"reformat" description:"Reformat storage overwriting any existing filesystem (CAUTION: Potentially destructive)"`
+	Ranks    string `long:"ranks" short:"r" description:"Comma separated list of system ranks to format, default is all ranks"`
 }
 
-// Execute is run when storageFormatCmd activates
+// shouldReformatSystem queries system to interrogate membership before deciding
+// whether a system reformat is appropriate.
 //
-// run NVMe and SCM storage format on all connected servers
-func (cmd *storageFormatCmd) Execute(args []string) error {
-	ctx := context.Background()
-	req := &control.StorageFormatReq{
-		Reformat: cmd.Reformat,
+// Reformat system if membership is not empty and all member ranks are stopped.
+func (cmd *storageFormatCmd) shouldReformatSystem(ctx context.Context, ranks []system.Rank) (bool, error) {
+	if cmd.Reformat {
+		cmd.log.Info("processing system reformat request")
+
+		resp, err := control.SystemQuery(ctx, cmd.ctlInvoker, &control.SystemQueryReq{})
+		if err != nil {
+			return false, errors.Wrap(err, "System-Query command failed")
+		}
+
+		if len(resp.Members) == 0 {
+			cmd.log.Debug("no system members, reformat host list")
+			if len(ranks) > 0 {
+				return false, errors.New(
+					"--ranks parameter invalid as membership is empty")
+			}
+
+			return false, nil
+		}
+
+		notStoppedRanks, err := system.NewRankSet("")
+		if err != nil {
+			return false, err
+		}
+		for _, member := range resp.Members {
+			if member.State() != system.MemberStateStopped {
+				if err := notStoppedRanks.Add(member.Rank); err != nil {
+					return false, errors.Wrap(err, "adding to rank set")
+				}
+			}
+		}
+		if notStoppedRanks.Count() > 0 {
+			return false, errors.Errorf(
+				"system reformat requires the following %s to be stopped: %s",
+				english.Plural(notStoppedRanks.Count(), "rank", "ranks"),
+				notStoppedRanks.String())
+		}
+
+		return true, nil
 	}
-	req.SetHostList(cmd.hostlist)
-	resp, err := control.StorageFormat(ctx, cmd.ctlInvoker, req)
+
+	if len(ranks) > 0 {
+		return false, errors.New("--ranks parameter invalid if --reformat is not set")
+	}
+
+	return false, nil
+}
+
+// Execute is run when storageFormatCmd activates.
+//
+// Run NVMe and SCM storage format on all connected servers.
+func (cmd *storageFormatCmd) Execute(args []string) (err error) {
+	ctx := context.Background()
+
+	ranks, err := system.ParseRanks(cmd.Ranks)
+	if err != nil {
+		return errors.Wrap(err, "parsing rank list")
+	}
+
+	sysReformat, err := cmd.shouldReformatSystem(ctx, ranks)
+	if err != nil {
+		return err
+	}
+	if !sysReformat {
+		req := &control.StorageFormatReq{Reformat: cmd.Reformat}
+		req.SetHostList(cmd.hostlist)
+		resp, err := control.StorageFormat(ctx, cmd.ctlInvoker, req)
+		if err != nil {
+			return err
+		}
+
+		return cmd.printFormatResp(resp)
+	}
+
+	resp, err := control.SystemReformat(ctx, cmd.ctlInvoker,
+		&control.SystemResetFormatReq{Ranks: ranks})
 	if err != nil {
 		return err
 	}
 
+	return cmd.printFormatResp(resp)
+}
+
+func (cmd *storageFormatCmd) printFormatResp(resp *control.StorageFormatResp) error {
 	if cmd.jsonOutputEnabled() {
 		return cmd.outputJSON(os.Stdout, resp)
 	}
@@ -194,18 +272,23 @@ type setFaultyCmd struct {
 
 // nvmeSetFaultyCmd is the struct representing the set-faulty storage subcommand
 type nvmeSetFaultyCmd struct {
-	logCmd
-	connectedCmd
-	Devuuid string `short:"u" long:"devuuid" description:"Device/Blobstore UUID to set" required:"1"`
+	smdQueryCmd
+	UUID  string `short:"u" long:"uuid" description:"Device UUID to set" required:"1"`
+	Force bool   `short:"f" long:"force" description:"Do not require confirmation"`
 }
 
 // Execute is run when nvmeSetFaultyCmd activates
 // Set the SMD device state of the given device to "FAULTY"
-func (s *nvmeSetFaultyCmd) Execute(args []string) error {
-	// Devuuid is a required command parameter
-	req := &mgmtpb.DevStateReq{DevUuid: s.Devuuid}
+func (cmd *nvmeSetFaultyCmd) Execute(_ []string) error {
+	cmd.log.Info("WARNING: This command will permanently mark the device as unusable!")
+	if !cmd.Force && !common.GetConsent(cmd.log) {
+		return errors.New("consent not given")
+	}
 
-	s.log.Infof("Device State Info:\n%s\n", s.conns.StorageSetFaulty(req))
-
-	return nil
+	ctx := context.Background()
+	req := &control.SmdQueryReq{
+		UUID:      cmd.UUID,
+		SetFaulty: true,
+	}
+	return cmd.makeRequest(ctx, req)
 }

@@ -225,7 +225,8 @@ rdb_lc_store_replicas(daos_handle_t lc, uint64_t index,
 	keys[1] = rdb_lc_replicas;
 	d_iov_set(&vals[1], replicas->rl_ranks,
 		     sizeof(*replicas->rl_ranks) * nreplicas);
-	return rdb_lc_update(lc, index, RDB_LC_ATTRS, 2 /* n */, keys, vals);
+	return rdb_lc_update(lc, index, RDB_LC_ATTRS, true /* crit */,
+			     2 /* n */, keys, vals);
 }
 
 static int
@@ -1117,11 +1118,13 @@ rdb_raft_log_offer_single(raft_server_t *raft, void *arg,
 	d_iov_t		values[2];
 	struct rdb_entry	header;
 	int			n = 0;
+	bool			crit;
 	int			rc;
 	int			rc_tmp;
 
 	D_ASSERTF(index == db->d_lc_record.dlr_tail, DF_U64" == "DF_U64"\n",
 		  index, db->d_lc_record.dlr_tail);
+
 	/*
 	 * If this is an rdb_tx entry, apply it. Note that the updates involved
 	 * won't become visible to queries until entry index is committed.
@@ -1131,13 +1134,14 @@ rdb_raft_log_offer_single(raft_server_t *raft, void *arg,
 	 */
 	if (entry->type == RAFT_LOGTYPE_NORMAL) {
 		rc = rdb_tx_apply(db, index, entry->data.buf, entry->data.len,
-				  rdb_raft_lookup_result(db, index));
+				  rdb_raft_lookup_result(db, index), &crit);
 		if (rc != 0) {
 			D_ERROR(DF_DB": failed to apply entry "DF_U64": %d\n",
 				DP_DB(db), index, rc);
 			goto err_discard;
 		}
 	} else if (raft_entry_is_cfg_change(entry)) {
+		crit = true;
 		rc = rdb_raft_update_node(db, index, entry);
 		if (rc != 0)
 			goto err_discard;
@@ -1158,7 +1162,8 @@ rdb_raft_log_offer_single(raft_server_t *raft, void *arg,
 		d_iov_set(&values[n], entry->data.buf, entry->data.len);
 		n++;
 	}
-	rc = rdb_lc_update(db->d_lc, index, RDB_LC_ATTRS, n, keys, values);
+	rc = rdb_lc_update(db->d_lc, index, RDB_LC_ATTRS, crit, n,
+			   keys, values);
 	if (rc != 0) {
 		D_ERROR(DF_DB": failed to persist entry "DF_U64": %d\n",
 			DP_DB(db), index, rc);
@@ -2519,6 +2524,27 @@ rdb_raft_resign(struct rdb *db, uint64_t term)
 	raft_become_follower(db->d_raft);
 	rc = rdb_raft_check_state(db, &state, 0 /* raft_rc */);
 	D_ASSERTF(rc == 0, ""DF_RC"\n", DP_RC(rc));
+}
+
+/* Call new election (campaign to be leader) by a follower */
+int
+rdb_raft_campaign(struct rdb *db)
+{
+	struct rdb_raft_state	state;
+	int			rc;
+
+	if (!raft_is_follower(db->d_raft)) {
+		D_DEBUG(DB_MD, DF_DB": no election called, must be follower\n",
+			DP_DB(db));
+		return 0;
+	}
+
+	rdb_raft_save_state(db, &state);
+	D_DEBUG(DB_MD, DF_DB": calling election from current term %d\n",
+		DP_DB(db), raft_get_current_term(db->d_raft));
+	rc = raft_election_start(db->d_raft);
+	rc = rdb_raft_check_state(db, &state, rc /* raft_rc */);
+	return rc;
 }
 
 /* Wait for index to be applied in term. For leaders only. */

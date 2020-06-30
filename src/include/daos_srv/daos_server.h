@@ -164,66 +164,29 @@ struct srv_profile_op {
 };
 
 /* Holding the total trunk list for a specific profiling module */
-struct srv_profile {
-	struct srv_profile_op *sp_ops;
-	int		sp_ops_cnt;
-	int		sp_avg;
-	int		sp_id;
-	char		*sp_dir_path;	/* Where to dump the profiling */
-	char		**sp_names;	/* profile name */
-	ABT_thread	sp_dump_thread;	/* dump thread for profile */
-	unsigned int	sp_stop:1,
-			sp_empty:1;
-};
 
-enum profile_op {
-	OBJ_PF_UPDATE_PREP = 0,
-	OBJ_PF_UPDATE_DISPATCH,
-	OBJ_PF_UPDATE_LOCAL,
-	OBJ_PF_UPDATE_END,
-	OBJ_PF_UPDATE_WAIT,
-	OBJ_PF_UPDATE_REPLY,
-	OBJ_PF_UPDATE,
-	VOS_UPDATE_END,
-	PF_MAX_CNT,
-};
-
-#ifndef VOS_STANDALONE
 #define D_TIME_START(start, op)			\
 do {						\
-	struct srv_profile *sp;			\
+	struct daos_profile *dp;		\
 						\
-	sp = dss_get_module_info()->dmi_sp;	\
-	if ((sp) == NULL)			\
+	dp = dss_get_module_info()->dmi_dp;	\
+	if ((dp) == NULL)			\
 		break;				\
 	start = daos_get_ntime();		\
 } while (0)
 
 #define D_TIME_END(start, op)			\
 do {						\
-	struct srv_profile *sp;			\
-						\
-	sp = dss_get_module_info()->dmi_sp;	\
+	struct daos_profile *dp;		\
 	int time_msec;				\
-	if ((sp) == NULL || start == 0)		\
+						\
+	dp = dss_get_module_info()->dmi_dp;	\
+	if ((dp) == NULL || start == 0)		\
 		break;				\
 	time_msec = (daos_get_ntime() - start)/1000; \
-	srv_profile_count(sp, op, time_msec);	\
+	daos_profile_count(dp, op, time_msec);	\
 } while (0)
 
-#else
-unsigned int tmp_count;
-#define D_TIME_START(start, op)			\
-do {						\
-	start = 1;				\
-} while(0)
-
-#define D_TIME_END(start, op)			\
-do {						\
-	tmp_count += start;			\
-} while(0)
-
-#endif
 /* Opaque xstream configuration data */
 struct dss_xstream;
 
@@ -242,7 +205,7 @@ struct dss_module_info {
 	int			dmi_ctx_id;
 	d_list_t		dmi_dtx_batched_list;
 	/* the profile information */
-	struct srv_profile	*dmi_sp;
+	struct daos_profile	*dmi_dp;
 };
 
 extern struct dss_module_key	daos_srv_modkey;
@@ -284,9 +247,114 @@ struct dss_drpc_handler {
 	drpc_handler_t	handler;	/** dRPC handler for the module */
 };
 
+enum {
+	SCHED_REQ_IO	= 0,
+	SCHED_REQ_GC,
+	SCHED_REQ_MIGRATE,
+	SCHED_REQ_MAX,
+};
+
+struct sched_req_attr {
+	uuid_t		sra_pool_id;
+	uint32_t	sra_type;
+};
+
+static inline void
+sched_req_attr_init(struct sched_req_attr *attr, unsigned int type,
+		    uuid_t *pool_id)
+{
+	attr->sra_type = type;
+	uuid_copy(attr->sra_pool_id, *pool_id);
+}
+
+struct sched_request;	/* Opaque schedule request */
+
+/**
+ * Get A sched request.
+ *
+ * \param[in] attr	Sched request attributes.
+ * \param[in] ult	ULT attached to the sched request,
+ *			self ULT will be used when ult == ABT_THREAD_NULL.
+ *
+ * \retval		Sched request.
+ */
+struct sched_request *
+sched_req_get(struct sched_req_attr *attr, ABT_thread ult);
+
+/**
+ * Put A sched request.
+ *
+ * \param[in] req	Sched request.
+ *
+ * \retval		N/A
+ */
+void sched_req_put(struct sched_request *req);
+
+/**
+ * Suspend (or yield) a sched request attached ULT.
+ *
+ * \param[in] req	Sched request.
+ *
+ * \retval		N/A
+ */
+void sched_req_yield(struct sched_request *req);
+
+/**
+ * Put a sched request attached ULT to sleep for few msecs.
+ *
+ * \param[in] req	Sched request.
+ * \param[in] msec	Milli seconds.
+ *
+ * \retval		N/A
+ */
+void sched_req_sleep(struct sched_request *req, uint32_t msec);
+
+/**
+ * Wakeup a sched request attached ULT.
+ *
+ * \param[in] req	Sched request.
+ *
+ * \retval		N/A
+ */
+void sched_req_wakeup(struct sched_request *req);
+
+/**
+ * Wakeup a sched request attached ULT terminated.
+ *
+ * \param[in] req	Sched request.
+ * \param[in] abort	Abort the ULT or not.
+ *
+ * \retval		N/A
+ */
+void sched_req_wait(struct sched_request *req, bool abort);
+
+/**
+ * Check if a sched request is set as aborted.
+ *
+ * \param[in] req	Sched request.
+ *
+ * \retval		True for aborted, False otherwise.
+ */
+bool sched_req_is_aborted(struct sched_request *req);
+
+enum {
+	SCHED_SPACE_PRESS_NONE	= 0,
+	SCHED_SPACE_PRESS_LIGHT,
+	SCHED_SPACE_PRESS_SEVERE,
+};
+
+/**
+ * Check space pressure of the pool of current sched request.
+ *
+ * \param[in] req	Sched request.
+ *
+ * \retval		None, light or severe.
+ */
+int sched_req_space_check(struct sched_request *req);
+
 struct dss_module_ops {
-	/* The callback for each module will choose ABT pool to handle RPC */
-	ABT_pool (*dms_abt_pool_choose_cb)(crt_rpc_t *rpc, ABT_pool *pools);
+	/* Get schedule request attributes from RPC */
+	int (*dms_get_req_attr)(crt_rpc_t *rpc, struct sched_req_attr *attr);
 
 	/* Each module to start/stop the profiling */
 	int	(*dms_profile_start)(char *path, int avg);
@@ -294,9 +362,7 @@ struct dss_module_ops {
 };
 
 int srv_profile_stop();
-int srv_profile_count(struct srv_profile *sp, int id, int time);
 int srv_profile_start(char *path, int avg);
-void srv_profile_destroy(struct srv_profile *sp);
 
 /**
  * Each module should provide a dss_module structure which defines the module
@@ -399,6 +465,7 @@ struct dss_sleep_ult *dss_sleep_ult_create(void);
 void dss_sleep_ult_destroy(struct dss_sleep_ult *dsu);
 void dss_ult_sleep(struct dss_sleep_ult *dsu, uint64_t expire_secs);
 void dss_ult_wakeup(struct dss_sleep_ult *dsu);
+int dss_sleep(uint64_t ms);
 
 /* Pack return codes with additional argument to reduce */
 struct dss_stream_arg_type {
@@ -526,7 +593,6 @@ void dss_rpc_cntr_exit(enum dss_rpc_cntr_id id, bool failed);
 struct dss_rpc_cntr *dss_rpc_cntr_get(enum dss_rpc_cntr_id id);
 
 int dss_rpc_send(crt_rpc_t *rpc);
-void dss_sleep(int ms);
 int dss_rpc_reply(crt_rpc_t *rpc, unsigned int fail_loc);
 
 enum {
@@ -543,7 +609,7 @@ enum {
 struct dss_acc_task {
 	/**
 	 * Type of offload for this operation
-	 * \param at_offload_type	[IN] type of accelaration
+	 * \param at_offload_type	[IN] type of acceleration
 	 */
 	int		at_offload_type;
 	/**
@@ -564,7 +630,7 @@ struct dss_acc_task {
 };
 
 /**
- * Generic offload call abstraction for accelaration with both
+ * Generic offload call abstraction for acceleration with both
  * ULT and FPGA
  */
 int dss_acc_offload(struct dss_acc_task *at_args);
@@ -590,6 +656,10 @@ int dsc_obj_list_obj(daos_handle_t oh, daos_epoch_range_t *epr,
 		daos_anchor_t *akey_anchor);
 int dsc_pool_tgt_exclude(const uuid_t uuid, const char *grp,
 			 const d_rank_list_t *svc, struct d_tgt_list *tgts);
+
+int dsc_task_run(tse_task_t *task, tse_task_cb_t retry_cb, void *arg,
+		 int arg_size, bool sync);
+tse_sched_t *dsc_scheduler(void);
 
 struct dss_enum_arg {
 	bool			fill_recxs;	/* type == S||R */
@@ -702,6 +772,9 @@ ds_object_migrate(struct ds_pool *pool, uuid_t pool_hdl_uuid, uuid_t cont_uuid,
 		  unsigned int *shards, int cnt, int clear_conts);
 void
 ds_migrate_fini_one(uuid_t pool_uuid, uint32_t ver);
+
+void
+ds_migrate_abort(uuid_t pool_uuid, uint32_t ver);
 
 /** Server init state (see server_init) */
 enum dss_init_state {

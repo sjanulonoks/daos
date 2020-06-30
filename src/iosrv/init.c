@@ -168,7 +168,7 @@ modules_load(void)
 	char		*run;
 	int		 rc = 0;
 
-	sep = strdup(modules);
+	D_STRNDUP(sep, modules, MAX_MODULE_OPTIONS + 1);
 	if (sep == NULL)
 		return -DER_NOMEM;
 	run = sep;
@@ -904,8 +904,6 @@ main(int argc, char **argv)
 	rc = parse(argc, argv);
 	if (rc)
 		exit(EXIT_FAILURE);
-
-	(void)pthread_setname_np(pthread_self(), "daos_main");
 
 	/** block all possible signals but faults */
 	sigfillset(&set);

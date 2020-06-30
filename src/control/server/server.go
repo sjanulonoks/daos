@@ -39,6 +39,7 @@ import (
 
 	ctlpb "github.com/daos-stack/daos/src/control/common/proto/ctl"
 	mgmtpb "github.com/daos-stack/daos/src/control/common/proto/mgmt"
+	"github.com/daos-stack/daos/src/control/lib/control"
 	"github.com/daos-stack/daos/src/control/lib/netdetect"
 	"github.com/daos-stack/daos/src/control/logging"
 	"github.com/daos-stack/daos/src/control/pbin"
@@ -102,6 +103,12 @@ func Start(log *logging.LeveledLogger, cfg *Configuration) error {
 		}
 	}
 
+	if cfg.FWHelperLogFile != "" {
+		if err := os.Setenv(pbin.DaosFWLogFileEnvVar, cfg.FWHelperLogFile); err != nil {
+			return errors.Wrap(err, "unable to configure privileged firmware helper logging")
+		}
+	}
+
 	// Create the root context here. All contexts should
 	// inherit from this one so that they can be shut down
 	// from one place.
@@ -159,6 +166,8 @@ func Start(log *logging.LeveledLogger, cfg *Configuration) error {
 	membership := system.NewMembership(log)
 	scmProvider := scm.DefaultProvider(log)
 	harness := NewIOServerHarness(log)
+	var netDevClass uint32
+
 	for i, srvCfg := range cfg.Servers {
 		if i+1 > maxIOServers {
 			break
@@ -207,10 +216,24 @@ func Start(log *logging.LeveledLogger, cfg *Configuration) error {
 		if err := harness.AddInstance(srv); err != nil {
 			return err
 		}
+
+		if i == 0 {
+			netDevClass, err = cfg.getDeviceClassFn(srvCfg.Fabric.Interface)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
+	// Create rpcClient for inter-server communication.
+	cliCfg := control.DefaultConfig()
+	cliCfg.TransportConfig = cfg.TransportConfig
+	rpcClient := control.NewClient(
+		control.WithConfig(cliCfg),
+		control.WithClientLogger(log))
+
 	// Create and setup control service.
-	controlService, err := NewControlService(log, harness, bdevProvider, scmProvider, cfg, membership)
+	controlService, err := NewControlService(log, harness, bdevProvider, scmProvider, cfg, membership, rpcClient)
 	if err != nil {
 		return errors.Wrap(err, "init control service")
 	}
@@ -260,10 +283,12 @@ func Start(log *logging.LeveledLogger, cfg *Configuration) error {
 
 	grpcServer := grpc.NewServer(opts...)
 	ctlpb.RegisterMgmtCtlServer(grpcServer, controlService)
+
 	clientNetworkCfg := ClientNetworkCfg{
 		Provider:        cfg.Fabric.Provider,
 		CrtCtxShareAddr: cfg.Fabric.CrtCtxShareAddr,
 		CrtTimeout:      cfg.Fabric.CrtTimeout,
+		NetDevClass:     netDevClass,
 	}
 	mgmtpb.RegisterMgmtSvcServer(grpcServer, newMgmtSvc(harness, membership, &clientNetworkCfg))
 

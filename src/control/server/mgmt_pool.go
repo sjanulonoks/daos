@@ -79,7 +79,7 @@ func (svc *mgmtSvc) PoolCreate(ctx context.Context, req *mgmtpb.PoolCreateReq) (
 		default:
 		}
 
-		dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolCreate, req)
+		dresp, err := mi.CallDrpc(drpc.MethodPoolCreate, req)
 		if err != nil {
 			return nil, err
 		}
@@ -126,7 +126,7 @@ func (svc *mgmtSvc) PoolDestroy(ctx context.Context, req *mgmtpb.PoolDestroyReq)
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolDestroy, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolDestroy, req)
 	if err != nil {
 		return nil, err
 	}
@@ -137,6 +137,100 @@ func (svc *mgmtSvc) PoolDestroy(ctx context.Context, req *mgmtpb.PoolDestroyReq)
 	}
 
 	svc.log.Debugf("MgmtSvc.PoolDestroy dispatch, resp:%+v\n", *resp)
+
+	return resp, nil
+}
+
+// PoolEvict implements the method defined for the Management Service.
+func (svc *mgmtSvc) PoolEvict(ctx context.Context, req *mgmtpb.PoolEvictReq) (*mgmtpb.PoolEvictResp, error) {
+	if req == nil {
+		return nil, errors.New("nil request")
+	}
+	if req.GetUuid() == "" {
+		return nil, errors.New("nil UUID")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolEvict dispatch, req:%+v\n", *req)
+
+	mi, err := svc.harness.GetMSLeaderInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	dresp, err := mi.CallDrpc(drpc.MethodPoolEvict, req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &mgmtpb.PoolEvictResp{}
+	if err = proto.Unmarshal(dresp.Body, resp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal PoolEvict response")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolEvict dispatch, resp:%+v\n", *resp)
+
+	return resp, nil
+}
+
+// PoolExclude implements the method defined for the Management Service.
+func (svc *mgmtSvc) PoolExclude(ctx context.Context, req *mgmtpb.PoolExcludeReq) (*mgmtpb.PoolExcludeResp, error) {
+	if req == nil {
+		return nil, errors.New("nil request")
+	}
+	if req.GetUuid() == "" {
+		// TODO: do we want to validate pool exists via ListPools?
+		return nil, errors.New("nil UUID")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolExclude dispatch, req:%+v\n", *req)
+
+	mi, err := svc.harness.GetMSLeaderInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	dresp, err := mi.CallDrpc(drpc.MethodPoolExclude, req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &mgmtpb.PoolExcludeResp{}
+	if err = proto.Unmarshal(dresp.Body, resp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal PoolExclude response")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolExclude dispatch, resp:%+v\n", *resp)
+
+	return resp, nil
+}
+
+// PoolExtend implements the method defined for the Management Service.
+func (svc *mgmtSvc) PoolExtend(ctx context.Context, req *mgmtpb.PoolExtendReq) (*mgmtpb.PoolExtendResp, error) {
+	if req == nil {
+		return nil, errors.New("nil request")
+	}
+	if req.GetUuid() == "" {
+		return nil, errors.New("nil UUID")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolExtend dispatch, req:%+v\n", *req)
+
+	mi, err := svc.harness.GetMSLeaderInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	dresp, err := mi.CallDrpc(drpc.MethodPoolExtend, req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &mgmtpb.PoolExtendResp{}
+	if err = proto.Unmarshal(dresp.Body, resp); err != nil {
+		return nil, errors.Wrap(err, "unmarshal PoolExtend response")
+	}
+
+	svc.log.Debugf("MgmtSvc.PoolExtend dispatch, resp:%+v\n", *resp)
 
 	return resp, nil
 }
@@ -158,7 +252,7 @@ func (svc *mgmtSvc) PoolReintegrate(ctx context.Context, req *mgmtpb.PoolReinteg
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolReintegrate, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolReintegrate, req)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +280,7 @@ func (svc *mgmtSvc) PoolQuery(ctx context.Context, req *mgmtpb.PoolQueryReq) (*m
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolQuery, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolQuery, req)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +340,7 @@ func (svc *mgmtSvc) PoolSetProp(ctx context.Context, req *mgmtpb.PoolSetPropReq)
 
 	svc.log.Debugf("MgmtSvc.PoolSetProp dispatch, req (converted):%+v", *newReq)
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolSetProp, newReq)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolSetProp, newReq)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +382,7 @@ func (svc *mgmtSvc) PoolGetACL(ctx context.Context, req *mgmtpb.GetACLReq) (*mgm
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolGetACL, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolGetACL, req)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +406,7 @@ func (svc *mgmtSvc) PoolOverwriteACL(ctx context.Context, req *mgmtpb.ModifyACLR
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolOverwriteACL, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolOverwriteACL, req)
 	if err != nil {
 		return nil, err
 	}
@@ -337,7 +431,7 @@ func (svc *mgmtSvc) PoolUpdateACL(ctx context.Context, req *mgmtpb.ModifyACLReq)
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolUpdateACL, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolUpdateACL, req)
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +456,7 @@ func (svc *mgmtSvc) PoolDeleteACL(ctx context.Context, req *mgmtpb.DeleteACLReq)
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodPoolDeleteACL, req)
+	dresp, err := mi.CallDrpc(drpc.MethodPoolDeleteACL, req)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +481,7 @@ func (svc *mgmtSvc) ListPools(ctx context.Context, req *mgmtpb.ListPoolsReq) (*m
 		return nil, err
 	}
 
-	dresp, err := mi.CallDrpc(drpc.ModuleMgmt, drpc.MethodListPools, req)
+	dresp, err := mi.CallDrpc(drpc.MethodListPools, req)
 	if err != nil {
 		return nil, err
 	}

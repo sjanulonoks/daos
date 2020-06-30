@@ -141,6 +141,7 @@ int rdb_raft_init(daos_handle_t pool, daos_handle_t mc,
 int rdb_raft_start(struct rdb *db);
 void rdb_raft_stop(struct rdb *db);
 void rdb_raft_resign(struct rdb *db, uint64_t term);
+int rdb_raft_campaign(struct rdb *db);
 int rdb_raft_verify_leadership(struct rdb *db);
 int rdb_raft_add_replica(struct rdb *db, d_rank_t rank);
 int rdb_raft_remove_replica(struct rdb *db, d_rank_t rank);
@@ -260,7 +261,7 @@ void rdb_recvd(void *arg);
 /* rdb_tx.c *******************************************************************/
 
 int rdb_tx_apply(struct rdb *db, uint64_t index, const void *buf, size_t len,
-		 void *result);
+		 void *result, bool *critp);
 
 /* rdb_kvs.c ******************************************************************/
 
@@ -323,8 +324,8 @@ int rdb_vos_iter_fetch(daos_handle_t cont, daos_epoch_t epoch, rdb_oid_t oid,
 		       daos_key_t *akey_out, d_iov_t *value);
 int rdb_vos_iterate(daos_handle_t cont, daos_epoch_t epoch, rdb_oid_t oid,
 		    bool backward, rdb_iterate_cb_t cb, void *arg);
-int rdb_vos_update(daos_handle_t cont, daos_epoch_t epoch, rdb_oid_t oid, int n,
-		   d_iov_t akeys[], d_iov_t values[]);
+int rdb_vos_update(daos_handle_t cont, daos_epoch_t epoch, rdb_oid_t oid,
+		   bool crit, int n, d_iov_t akeys[], d_iov_t values[]);
 int rdb_vos_punch(daos_handle_t cont, daos_epoch_t epoch, rdb_oid_t oid, int n,
 		  d_iov_t akeys[]);
 int rdb_vos_discard(daos_handle_t cont, daos_epoch_t low, daos_epoch_t high);
@@ -345,7 +346,8 @@ rdb_mc_update(daos_handle_t mc, rdb_oid_t oid, int n, d_iov_t akeys[],
 	D_DEBUG(DB_TRACE, "mc="DF_X64" oid="DF_X64" n=%d akeys[0]=<%p, %zd> "
 		"values[0]=<%p, %zd>\n", mc.cookie, oid, n, akeys[0].iov_buf,
 		akeys[0].iov_len, values[0].iov_buf, values[0].iov_len);
-	return rdb_vos_update(mc, RDB_MC_EPOCH, oid, n, akeys, values);
+	return rdb_vos_update(mc, RDB_MC_EPOCH, oid, true /* crit */, n,
+			      akeys, values);
 }
 
 static inline int
@@ -360,14 +362,14 @@ rdb_mc_lookup(daos_handle_t mc, rdb_oid_t oid, d_iov_t *akey,
 }
 
 static inline int
-rdb_lc_update(daos_handle_t lc, uint64_t index, rdb_oid_t oid, int n,
-	      d_iov_t akeys[], d_iov_t values[])
+rdb_lc_update(daos_handle_t lc, uint64_t index, rdb_oid_t oid, bool crit,
+	      int n, d_iov_t akeys[], d_iov_t values[])
 {
 	D_DEBUG(DB_TRACE, "lc="DF_X64" index="DF_U64" oid="DF_X64
 		" n=%d akeys[0]=<%p, %zd> values[0]=<%p, %zd>\n", lc.cookie,
 		index, oid, n, akeys[0].iov_buf, akeys[0].iov_len,
 		values[0].iov_buf, values[0].iov_len);
-	return rdb_vos_update(lc, index, oid, n, akeys, values);
+	return rdb_vos_update(lc, index, oid, crit, n, akeys, values);
 }
 
 static inline int

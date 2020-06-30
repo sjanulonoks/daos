@@ -192,61 +192,62 @@ func init() {
 	proto.RegisterType((*RanksResp_RankResult)(nil), "mgmt.RanksResp.RankResult")
 }
 
-func init() { proto.RegisterFile("mgmt.proto", fileDescriptor_24cf82780fd24e73) }
+func init() {
+	proto.RegisterFile("mgmt.proto", fileDescriptor_24cf82780fd24e73)
+}
 
 var fileDescriptor_24cf82780fd24e73 = []byte{
-	// 661 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x95, 0x5f, 0x4f, 0x13, 0x41,
-	0x10, 0xc0, 0xad, 0x94, 0x3f, 0x1d, 0x68, 0x29, 0x0b, 0xe2, 0x79, 0x4f, 0x0d, 0x2f, 0xf6, 0x09,
-	0x13, 0x44, 0x94, 0x68, 0x62, 0x84, 0x46, 0xd1, 0x40, 0xa8, 0x77, 0xf1, 0xd9, 0x9c, 0xed, 0x50,
-	0x2e, 0xb6, 0xb7, 0xd7, 0xbd, 0x69, 0x09, 0x7e, 0x37, 0xbf, 0x8a, 0x9f, 0xc5, 0xcc, 0xee, 0xde,
-	0xdd, 0xb6, 0x94, 0x04, 0xde, 0x66, 0x7e, 0x37, 0xbf, 0xdd, 0x99, 0xbd, 0xeb, 0x16, 0x60, 0x34,
-	0x18, 0xd1, 0x7e, 0xaa, 0x24, 0x49, 0x51, 0xe5, 0xd8, 0x87, 0x54, 0xca, 0xa1, 0x21, 0x3e, 0xf4,
-	0x64, 0x62, 0x9f, 0xfa, 0xb5, 0x4c, 0x4d, 0x6d, 0xb8, 0x9d, 0x91, 0x54, 0xd1, 0x00, 0x7f, 0x8e,
-	0x27, 0xa8, 0x6e, 0xf3, 0xe7, 0x51, 0xcf, 0x6a, 0x7b, 0x47, 0xb0, 0x16, 0x44, 0xc9, 0xef, 0x2c,
-	0xc0, 0xb1, 0xd8, 0x81, 0x65, 0xc5, 0xb1, 0x57, 0x69, 0x2d, 0xb5, 0xeb, 0x81, 0x49, 0x98, 0x5e,
-	0x49, 0xd5, 0x43, 0x6f, 0xa9, 0x55, 0x69, 0xaf, 0x05, 0x26, 0xd9, 0xfb, 0x5b, 0x81, 0x9a, 0x15,
-	0xb3, 0x54, 0x1c, 0xc2, 0xaa, 0xc2, 0x6c, 0x32, 0x24, 0xe3, 0xae, 0x1f, 0xf8, 0xfb, 0xba, 0xd9,
-	0xa2, 0x42, 0x47, 0x81, 0x2e, 0x09, 0xf2, 0x52, 0xff, 0x0f, 0x40, 0x89, 0x85, 0x80, 0x2a, 0x6f,
-	0xe8, 0x55, 0x5a, 0x95, 0x76, 0x3d, 0xd0, 0xb1, 0xd8, 0x85, 0x95, 0xa8, 0x47, 0xb1, 0x4c, 0xbc,
-	0xa7, 0xad, 0x4a, 0xbb, 0x16, 0xd8, 0x4c, 0x78, 0xb0, 0x8a, 0x4a, 0x49, 0x85, 0x7d, 0xdb, 0x55,
-	0x9e, 0x8a, 0x26, 0x2c, 0x8d, 0xb2, 0x81, 0x57, 0xd5, 0xe5, 0x1c, 0x72, 0xff, 0x19, 0x45, 0x84,
-	0xde, 0xb2, 0x5e, 0xd8, 0x24, 0x07, 0xff, 0x00, 0x56, 0x2f, 0x06, 0x23, 0x0a, 0xa7, 0x3d, 0xf1,
-	0x12, 0xaa, 0xdf, 0x64, 0x9c, 0x88, 0xba, 0x69, 0x9a, 0xe3, 0x00, 0xc7, 0x7e, 0xc3, 0x4d, 0xb3,
-	0x74, 0xef, 0x89, 0xf8, 0x00, 0xeb, 0xe7, 0x18, 0xf5, 0x51, 0x7d, 0xe7, 0xc3, 0x14, 0x3b, 0xa6,
-	0xc0, 0x41, 0xac, 0x3d, 0x5b, 0x40, 0xb5, 0x7d, 0x0c, 0xd0, 0x95, 0x72, 0x78, 0xaa, 0x30, 0x22,
-	0x14, 0xdb, 0xa6, 0xac, 0x24, 0xec, 0xee, 0xdc, 0x85, 0xf9, 0xc6, 0xcc, 0x3a, 0x98, 0x91, 0x92,
-	0xc5, 0xc6, 0x0e, 0x72, 0x36, 0x9e, 0xa1, 0xda, 0x3e, 0x83, 0x4d, 0x86, 0x01, 0xc6, 0x09, 0xe1,
-	0x40, 0xf1, 0xee, 0x5e, 0x59, 0xeb, 0x60, 0x5e, 0xe5, 0xc5, 0x3d, 0x4f, 0xf4, 0x4a, 0x47, 0x50,
-	0xe3, 0x07, 0x66, 0x7c, 0x51, 0x56, 0x16, 0xc3, 0x6f, 0xdf, 0x61, 0x6e, 0xff, 0x21, 0x52, 0x57,
-	0xc9, 0xd4, 0xed, 0xdf, 0xa2, 0xb9, 0xfe, 0x0b, 0xaa, 0xed, 0x7d, 0x73, 0x70, 0x5f, 0x90, 0x3e,
-	0x9d, 0x9e, 0x8b, 0x4d, 0x53, 0x66, 0x32, 0xf6, 0xec, 0x6b, 0xd3, 0x99, 0xae, 0x7f, 0x0b, 0x4d,
-	0xae, 0xbf, 0x9c, 0xa2, 0xba, 0x51, 0x31, 0x21, 0x5b, 0xb6, 0xd9, 0x0b, 0xd9, 0x8f, 0xaf, 0x6e,
-	0xef, 0x13, 0x0f, 0xa1, 0xce, 0xe2, 0x8f, 0xb4, 0x1f, 0x3d, 0xde, 0xea, 0xe0, 0x10, 0x67, 0xac,
-	0x02, 0x2c, 0xb4, 0x4e, 0xa0, 0xce, 0x23, 0x10, 0x45, 0xbd, 0xeb, 0xaf, 0xc9, 0x95, 0x14, 0xbb,
-	0xe5, 0x5c, 0x05, 0x64, 0xf3, 0xf9, 0x42, 0xae, 0xd7, 0x78, 0x0f, 0x8d, 0x93, 0x58, 0x9e, 0x61,
-	0x34, 0xa4, 0xeb, 0x99, 0x77, 0x52, 0x50, 0xe7, 0x9d, 0x38, 0x4c, 0xcb, 0x07, 0xb0, 0x1e, 0x8e,
-	0xfa, 0xe7, 0x71, 0x46, 0x1d, 0x9c, 0x66, 0xf9, 0xb1, 0x86, 0xa3, 0x7e, 0x07, 0xa7, 0xac, 0x35,
-	0x67, 0x81, 0x76, 0xde, 0xc0, 0x86, 0x75, 0x78, 0xe2, 0x4c, 0x94, 0x35, 0xe6, 0x7b, 0x19, 0xfb,
-	0x5b, 0x73, 0x24, 0xff, 0x6c, 0x4a, 0xc7, 0xb6, 0x58, 0x00, 0xa7, 0x45, 0x87, 0x69, 0xef, 0x1d,
-	0xd4, 0x3b, 0x38, 0x0d, 0xf9, 0x07, 0x6b, 0xc6, 0xdb, 0xca, 0x4f, 0xd6, 0x40, 0x56, 0xc5, 0x3c,
-	0xb2, 0x27, 0xd3, 0x0c, 0xcd, 0xc5, 0x17, 0x22, 0x7d, 0x8e, 0x26, 0x43, 0x7a, 0x84, 0x7c, 0x0c,
-	0x0d, 0xee, 0xe4, 0x54, 0x26, 0x14, 0xc5, 0x09, 0xaa, 0x2c, 0x57, 0x73, 0xea, 0xa8, 0x25, 0xb2,
-	0x93, 0x6e, 0x75, 0x15, 0xa6, 0xe1, 0xf5, 0x84, 0xfa, 0xf2, 0x26, 0xd1, 0xf7, 0x9f, 0x68, 0xcc,
-	0x5c, 0x86, 0x63, 0x7f, 0x73, 0xee, 0x72, 0xd4, 0x9f, 0x78, 0x2d, 0x24, 0x99, 0x3e, 0xa6, 0xbe,
-	0x1b, 0x27, 0x83, 0x07, 0xd7, 0xbf, 0x02, 0x08, 0x29, 0x52, 0xf4, 0x60, 0xe1, 0x23, 0x6c, 0xf0,
-	0x58, 0x21, 0xd2, 0xe5, 0x4d, 0x82, 0x4a, 0xd8, 0x1f, 0xa7, 0xcb, 0xd8, 0xdc, 0x5d, 0x84, 0x79,
-	0x81, 0x5f, 0x2b, 0xfa, 0xff, 0xe5, 0xf5, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x7f, 0x00, 0x14,
-	0x54, 0xb6, 0x06, 0x00, 0x00,
+	// 644 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x95, 0xdb, 0x4e, 0xdb, 0x4c,
+	0x10, 0xc7, 0xbf, 0x7c, 0x84, 0x43, 0x86, 0x86, 0xc3, 0x86, 0x52, 0x37, 0x57, 0x11, 0x37, 0xcd,
+	0x15, 0x95, 0x80, 0x52, 0x55, 0xaa, 0x54, 0xb5, 0x40, 0x4f, 0x02, 0x91, 0xda, 0xea, 0x75, 0xe5,
+	0xda, 0x43, 0xb0, 0x9a, 0x78, 0x9d, 0xdd, 0x49, 0x80, 0xbe, 0x5b, 0xdf, 0xa4, 0x0f, 0x53, 0xcd,
+	0xee, 0xda, 0x59, 0x42, 0x90, 0xe0, 0x6e, 0xe6, 0xe7, 0xff, 0x7f, 0x67, 0xc6, 0x63, 0xad, 0x01,
+	0x86, 0xfd, 0x21, 0xed, 0x16, 0x4a, 0x92, 0x14, 0x75, 0x8e, 0xdb, 0x50, 0x48, 0x39, 0xb0, 0xa4,
+	0x0d, 0x89, 0xcc, 0xdd, 0xd3, 0x76, 0x43, 0xab, 0x89, 0x0b, 0x5b, 0x9a, 0xa4, 0x8a, 0xfb, 0xf8,
+	0x63, 0x34, 0x46, 0x75, 0x53, 0x3e, 0x8f, 0x13, 0x67, 0xdb, 0x39, 0x84, 0x95, 0x30, 0xce, 0x7f,
+	0xe9, 0x10, 0x47, 0x62, 0x0b, 0x16, 0x15, 0xc7, 0x41, 0xad, 0xb3, 0xd0, 0x6d, 0x86, 0x36, 0x61,
+	0x7a, 0x21, 0x55, 0x82, 0xc1, 0x42, 0xa7, 0xd6, 0x5d, 0x09, 0x6d, 0xb2, 0xf3, 0xa7, 0x06, 0x0d,
+	0x67, 0xd4, 0x85, 0x38, 0x80, 0x65, 0x85, 0x7a, 0x3c, 0x20, 0xeb, 0x5d, 0xdd, 0x6b, 0xef, 0x9a,
+	0x66, 0x2b, 0x85, 0x89, 0x42, 0x23, 0x09, 0x4b, 0x69, 0xfb, 0x37, 0xc0, 0x14, 0x0b, 0x01, 0x75,
+	0x2e, 0x18, 0xd4, 0x3a, 0xb5, 0x6e, 0x33, 0x34, 0xb1, 0xd8, 0x86, 0xa5, 0x38, 0xa1, 0x4c, 0xe6,
+	0xc1, 0xff, 0x9d, 0x5a, 0xb7, 0x11, 0xba, 0x4c, 0x04, 0xb0, 0x8c, 0x4a, 0x49, 0x85, 0xa9, 0xeb,
+	0xaa, 0x4c, 0xc5, 0x06, 0x2c, 0x0c, 0x75, 0x3f, 0xa8, 0x1b, 0x39, 0x87, 0xdc, 0xbf, 0xa6, 0x98,
+	0x30, 0x58, 0x34, 0x07, 0xdb, 0x64, 0xef, 0x2f, 0xc0, 0xf2, 0x59, 0x7f, 0x48, 0xd1, 0x24, 0x11,
+	0x2f, 0xa0, 0xfe, 0x55, 0x66, 0xb9, 0x68, 0xda, 0xa6, 0x39, 0x0e, 0x71, 0xd4, 0x5e, 0xf3, 0x53,
+	0x5d, 0xec, 0xfc, 0x27, 0xde, 0xc2, 0xea, 0x29, 0xc6, 0x29, 0xaa, 0x6f, 0xfc, 0x32, 0xc5, 0x96,
+	0x15, 0x78, 0x88, 0x6d, 0x4f, 0xe7, 0x50, 0xe3, 0x7e, 0x03, 0xd0, 0x93, 0x72, 0x70, 0xa4, 0x30,
+	0x26, 0x14, 0x2d, 0x2b, 0x9b, 0x12, 0xf6, 0x6e, 0xdd, 0x85, 0x65, 0x61, 0x66, 0xc7, 0xa8, 0x49,
+	0xc9, 0xaa, 0xb0, 0x87, 0xbc, 0xc2, 0xb7, 0xa8, 0x71, 0x1f, 0x42, 0x83, 0xe1, 0xc9, 0x24, 0x4b,
+	0x48, 0x88, 0xa9, 0xca, 0x00, 0x76, 0xb6, 0xee, 0x30, 0xbf, 0xea, 0xc9, 0x75, 0x32, 0x18, 0xa7,
+	0xe8, 0x57, 0x75, 0x68, 0xa6, 0x6a, 0x45, 0xfd, 0x71, 0x4f, 0xae, 0x09, 0xf3, 0xd4, 0x1f, 0xd7,
+	0x92, 0x99, 0x71, 0x4b, 0x68, 0xac, 0x9f, 0x61, 0x9d, 0x59, 0x88, 0x59, 0x4e, 0xd8, 0x57, 0xfc,
+	0xba, 0x82, 0xa9, 0xd4, 0xc3, 0x7c, 0xc8, 0xf3, 0x7b, 0x9e, 0xf8, 0xa3, 0xdb, 0x7d, 0x79, 0xa3,
+	0x57, 0xdb, 0x6a, 0xdd, 0x61, 0xfe, 0xe8, 0x11, 0x52, 0x4f, 0xc9, 0xc2, 0x1f, 0xdd, 0xa1, 0x99,
+	0xd1, 0x2b, 0x6a, 0xdc, 0xbb, 0x76, 0xf4, 0x4f, 0x48, 0xef, 0x8f, 0x4e, 0xc5, 0xba, 0x95, 0xd9,
+	0x8c, 0x7d, 0xee, 0x3b, 0x33, 0x99, 0xd1, 0xbf, 0x86, 0x0d, 0xd6, 0x9f, 0x4f, 0x50, 0x5d, 0xa9,
+	0x8c, 0x90, 0x5d, 0xae, 0xd9, 0x33, 0x99, 0x66, 0x17, 0x37, 0xf7, 0x19, 0x0f, 0xa0, 0xc9, 0xc6,
+	0xef, 0x45, 0x1a, 0x3f, 0xde, 0x75, 0x8c, 0x03, 0xbc, 0xe5, 0xaa, 0xc0, 0x5c, 0xd7, 0x07, 0x68,
+	0xf2, 0x08, 0x44, 0x71, 0x72, 0xf9, 0x25, 0xbf, 0x90, 0x62, 0x7b, 0x3a, 0x57, 0x05, 0xd9, 0xf9,
+	0x6c, 0x2e, 0x2f, 0xd7, 0x71, 0x9a, 0x69, 0xe2, 0xea, 0xba, 0xac, 0x5a, 0x01, 0x6f, 0x1d, 0x1e,
+	0x33, 0xbe, 0x7d, 0x58, 0x89, 0x86, 0xa9, 0xdd, 0xe2, 0xa6, 0x95, 0x94, 0x39, 0xbb, 0xc4, 0x2c,
+	0x72, 0x1f, 0xe0, 0x1a, 0x9f, 0x73, 0x24, 0x73, 0x8a, 0xb3, 0x1c, 0x95, 0x2e, 0xad, 0x25, 0xf5,
+	0xac, 0x53, 0xe4, 0xfa, 0xdc, 0xec, 0x29, 0x2c, 0xa2, 0xcb, 0x31, 0xa5, 0xf2, 0x2a, 0x37, 0xd7,
+	0x98, 0x58, 0xbb, 0x75, 0xa7, 0x8d, 0xda, 0xeb, 0x33, 0x77, 0x9c, 0x59, 0x7c, 0x23, 0x22, 0x59,
+	0x3c, 0x46, 0xdf, 0xcb, 0xf2, 0xfe, 0x83, 0xf5, 0xaf, 0x60, 0x23, 0x44, 0x8d, 0xf4, 0x51, 0xaa,
+	0x61, 0x4c, 0x0f, 0xb6, 0xbd, 0x04, 0x88, 0x28, 0x56, 0x0f, 0x37, 0xbc, 0x83, 0x27, 0xfc, 0x36,
+	0x22, 0xa4, 0xf3, 0xab, 0x1c, 0x95, 0x70, 0x5f, 0xba, 0xcf, 0xd8, 0xb9, 0x3d, 0x0f, 0xf3, 0x01,
+	0x3f, 0x97, 0xcc, 0xdf, 0x65, 0xff, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xaf, 0x99, 0x17, 0x80,
+	0xb4, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // MgmtSvcClient is the client API for MgmtSvc service.
 //
@@ -261,6 +262,12 @@ type MgmtSvcClient interface {
 	PoolCreate(ctx context.Context, in *PoolCreateReq, opts ...grpc.CallOption) (*PoolCreateResp, error)
 	// Destroy a DAOS pool allocated across a number of ranks.
 	PoolDestroy(ctx context.Context, in *PoolDestroyReq, opts ...grpc.CallOption) (*PoolDestroyResp, error)
+	// Evict a DAOS pool's connections.
+	PoolEvict(ctx context.Context, in *PoolEvictReq, opts ...grpc.CallOption) (*PoolEvictResp, error)
+	// Exclude a pool target.
+	PoolExclude(ctx context.Context, in *PoolExcludeReq, opts ...grpc.CallOption) (*PoolExcludeResp, error)
+	// Extend a pool.
+	PoolExtend(ctx context.Context, in *PoolExtendReq, opts ...grpc.CallOption) (*PoolExtendResp, error)
 	// Reintegrate a pool target.
 	PoolReintegrate(ctx context.Context, in *PoolReintegrateReq, opts ...grpc.CallOption) (*PoolReintegrateResp, error)
 	// PoolQuery queries a DAOS pool.
@@ -277,18 +284,10 @@ type MgmtSvcClient interface {
 	PoolDeleteACL(ctx context.Context, in *DeleteACLReq, opts ...grpc.CallOption) (*ACLResp, error)
 	// Get the information required by libdaos to attach to the system.
 	GetAttachInfo(ctx context.Context, in *GetAttachInfoReq, opts ...grpc.CallOption) (*GetAttachInfoResp, error)
-	// Get BIO device health information.
-	BioHealthQuery(ctx context.Context, in *BioHealthReq, opts ...grpc.CallOption) (*BioHealthResp, error)
-	// Get SMD device list.
-	SmdListDevs(ctx context.Context, in *SmdDevReq, opts ...grpc.CallOption) (*SmdDevResp, error)
-	// Get SMD pool list.
-	SmdListPools(ctx context.Context, in *SmdPoolReq, opts ...grpc.CallOption) (*SmdPoolResp, error)
 	// List all pools in a DAOS system: basic info: UUIDs, service ranks.
 	ListPools(ctx context.Context, in *ListPoolsReq, opts ...grpc.CallOption) (*ListPoolsResp, error)
-	// Get the current state of the device
-	DevStateQuery(ctx context.Context, in *DevStateReq, opts ...grpc.CallOption) (*DevStateResp, error)
-	// Set the device state of an NVMe SSD to FAULTY
-	StorageSetFaulty(ctx context.Context, in *DevStateReq, opts ...grpc.CallOption) (*DevStateResp, error)
+	// Query the per-server metadata
+	SmdQuery(ctx context.Context, in *SmdQueryReq, opts ...grpc.CallOption) (*SmdQueryResp, error)
 	// List all containers in a pool
 	ListContainers(ctx context.Context, in *ListContReq, opts ...grpc.CallOption) (*ListContResp, error)
 	// Prepare DAOS IO servers on a host for controlled shutdown. (gRPC fanout)
@@ -297,6 +296,8 @@ type MgmtSvcClient interface {
 	StopRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error)
 	// Ping DAOS IO servers on a host. (gRPC fanout)
 	PingRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error)
+	// ResetFormat DAOS IO servers on a host. (gRPC fanout)
+	ResetFormatRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error)
 	// Start DAOS IO servers on a host. (gRPC fanout)
 	StartRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error)
 	// Change the owner of a DAOS container
@@ -304,10 +305,10 @@ type MgmtSvcClient interface {
 }
 
 type mgmtSvcClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewMgmtSvcClient(cc *grpc.ClientConn) MgmtSvcClient {
+func NewMgmtSvcClient(cc grpc.ClientConnInterface) MgmtSvcClient {
 	return &mgmtSvcClient{cc}
 }
 
@@ -341,6 +342,33 @@ func (c *mgmtSvcClient) PoolCreate(ctx context.Context, in *PoolCreateReq, opts 
 func (c *mgmtSvcClient) PoolDestroy(ctx context.Context, in *PoolDestroyReq, opts ...grpc.CallOption) (*PoolDestroyResp, error) {
 	out := new(PoolDestroyResp)
 	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/PoolDestroy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mgmtSvcClient) PoolEvict(ctx context.Context, in *PoolEvictReq, opts ...grpc.CallOption) (*PoolEvictResp, error) {
+	out := new(PoolEvictResp)
+	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/PoolEvict", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mgmtSvcClient) PoolExclude(ctx context.Context, in *PoolExcludeReq, opts ...grpc.CallOption) (*PoolExcludeResp, error) {
+	out := new(PoolExcludeResp)
+	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/PoolExclude", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mgmtSvcClient) PoolExtend(ctx context.Context, in *PoolExtendReq, opts ...grpc.CallOption) (*PoolExtendResp, error) {
+	out := new(PoolExtendResp)
+	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/PoolExtend", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -419,33 +447,6 @@ func (c *mgmtSvcClient) GetAttachInfo(ctx context.Context, in *GetAttachInfoReq,
 	return out, nil
 }
 
-func (c *mgmtSvcClient) BioHealthQuery(ctx context.Context, in *BioHealthReq, opts ...grpc.CallOption) (*BioHealthResp, error) {
-	out := new(BioHealthResp)
-	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/BioHealthQuery", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mgmtSvcClient) SmdListDevs(ctx context.Context, in *SmdDevReq, opts ...grpc.CallOption) (*SmdDevResp, error) {
-	out := new(SmdDevResp)
-	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/SmdListDevs", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mgmtSvcClient) SmdListPools(ctx context.Context, in *SmdPoolReq, opts ...grpc.CallOption) (*SmdPoolResp, error) {
-	out := new(SmdPoolResp)
-	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/SmdListPools", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *mgmtSvcClient) ListPools(ctx context.Context, in *ListPoolsReq, opts ...grpc.CallOption) (*ListPoolsResp, error) {
 	out := new(ListPoolsResp)
 	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/ListPools", in, out, opts...)
@@ -455,18 +456,9 @@ func (c *mgmtSvcClient) ListPools(ctx context.Context, in *ListPoolsReq, opts ..
 	return out, nil
 }
 
-func (c *mgmtSvcClient) DevStateQuery(ctx context.Context, in *DevStateReq, opts ...grpc.CallOption) (*DevStateResp, error) {
-	out := new(DevStateResp)
-	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/DevStateQuery", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mgmtSvcClient) StorageSetFaulty(ctx context.Context, in *DevStateReq, opts ...grpc.CallOption) (*DevStateResp, error) {
-	out := new(DevStateResp)
-	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/StorageSetFaulty", in, out, opts...)
+func (c *mgmtSvcClient) SmdQuery(ctx context.Context, in *SmdQueryReq, opts ...grpc.CallOption) (*SmdQueryResp, error) {
+	out := new(SmdQueryResp)
+	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/SmdQuery", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -509,6 +501,15 @@ func (c *mgmtSvcClient) PingRanks(ctx context.Context, in *RanksReq, opts ...grp
 	return out, nil
 }
 
+func (c *mgmtSvcClient) ResetFormatRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error) {
+	out := new(RanksResp)
+	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/ResetFormatRanks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mgmtSvcClient) StartRanks(ctx context.Context, in *RanksReq, opts ...grpc.CallOption) (*RanksResp, error) {
 	out := new(RanksResp)
 	err := c.cc.Invoke(ctx, "/mgmt.MgmtSvc/StartRanks", in, out, opts...)
@@ -538,6 +539,12 @@ type MgmtSvcServer interface {
 	PoolCreate(context.Context, *PoolCreateReq) (*PoolCreateResp, error)
 	// Destroy a DAOS pool allocated across a number of ranks.
 	PoolDestroy(context.Context, *PoolDestroyReq) (*PoolDestroyResp, error)
+	// Evict a DAOS pool's connections.
+	PoolEvict(context.Context, *PoolEvictReq) (*PoolEvictResp, error)
+	// Exclude a pool target.
+	PoolExclude(context.Context, *PoolExcludeReq) (*PoolExcludeResp, error)
+	// Extend a pool.
+	PoolExtend(context.Context, *PoolExtendReq) (*PoolExtendResp, error)
 	// Reintegrate a pool target.
 	PoolReintegrate(context.Context, *PoolReintegrateReq) (*PoolReintegrateResp, error)
 	// PoolQuery queries a DAOS pool.
@@ -554,18 +561,10 @@ type MgmtSvcServer interface {
 	PoolDeleteACL(context.Context, *DeleteACLReq) (*ACLResp, error)
 	// Get the information required by libdaos to attach to the system.
 	GetAttachInfo(context.Context, *GetAttachInfoReq) (*GetAttachInfoResp, error)
-	// Get BIO device health information.
-	BioHealthQuery(context.Context, *BioHealthReq) (*BioHealthResp, error)
-	// Get SMD device list.
-	SmdListDevs(context.Context, *SmdDevReq) (*SmdDevResp, error)
-	// Get SMD pool list.
-	SmdListPools(context.Context, *SmdPoolReq) (*SmdPoolResp, error)
 	// List all pools in a DAOS system: basic info: UUIDs, service ranks.
 	ListPools(context.Context, *ListPoolsReq) (*ListPoolsResp, error)
-	// Get the current state of the device
-	DevStateQuery(context.Context, *DevStateReq) (*DevStateResp, error)
-	// Set the device state of an NVMe SSD to FAULTY
-	StorageSetFaulty(context.Context, *DevStateReq) (*DevStateResp, error)
+	// Query the per-server metadata
+	SmdQuery(context.Context, *SmdQueryReq) (*SmdQueryResp, error)
 	// List all containers in a pool
 	ListContainers(context.Context, *ListContReq) (*ListContResp, error)
 	// Prepare DAOS IO servers on a host for controlled shutdown. (gRPC fanout)
@@ -574,6 +573,8 @@ type MgmtSvcServer interface {
 	StopRanks(context.Context, *RanksReq) (*RanksResp, error)
 	// Ping DAOS IO servers on a host. (gRPC fanout)
 	PingRanks(context.Context, *RanksReq) (*RanksResp, error)
+	// ResetFormat DAOS IO servers on a host. (gRPC fanout)
+	ResetFormatRanks(context.Context, *RanksReq) (*RanksResp, error)
 	// Start DAOS IO servers on a host. (gRPC fanout)
 	StartRanks(context.Context, *RanksReq) (*RanksResp, error)
 	// Change the owner of a DAOS container
@@ -595,6 +596,15 @@ func (*UnimplementedMgmtSvcServer) PoolCreate(ctx context.Context, req *PoolCrea
 }
 func (*UnimplementedMgmtSvcServer) PoolDestroy(ctx context.Context, req *PoolDestroyReq) (*PoolDestroyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PoolDestroy not implemented")
+}
+func (*UnimplementedMgmtSvcServer) PoolEvict(ctx context.Context, req *PoolEvictReq) (*PoolEvictResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PoolEvict not implemented")
+}
+func (*UnimplementedMgmtSvcServer) PoolExclude(ctx context.Context, req *PoolExcludeReq) (*PoolExcludeResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PoolExclude not implemented")
+}
+func (*UnimplementedMgmtSvcServer) PoolExtend(ctx context.Context, req *PoolExtendReq) (*PoolExtendResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PoolExtend not implemented")
 }
 func (*UnimplementedMgmtSvcServer) PoolReintegrate(ctx context.Context, req *PoolReintegrateReq) (*PoolReintegrateResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PoolReintegrate not implemented")
@@ -620,23 +630,11 @@ func (*UnimplementedMgmtSvcServer) PoolDeleteACL(ctx context.Context, req *Delet
 func (*UnimplementedMgmtSvcServer) GetAttachInfo(ctx context.Context, req *GetAttachInfoReq) (*GetAttachInfoResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAttachInfo not implemented")
 }
-func (*UnimplementedMgmtSvcServer) BioHealthQuery(ctx context.Context, req *BioHealthReq) (*BioHealthResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BioHealthQuery not implemented")
-}
-func (*UnimplementedMgmtSvcServer) SmdListDevs(ctx context.Context, req *SmdDevReq) (*SmdDevResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SmdListDevs not implemented")
-}
-func (*UnimplementedMgmtSvcServer) SmdListPools(ctx context.Context, req *SmdPoolReq) (*SmdPoolResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SmdListPools not implemented")
-}
 func (*UnimplementedMgmtSvcServer) ListPools(ctx context.Context, req *ListPoolsReq) (*ListPoolsResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPools not implemented")
 }
-func (*UnimplementedMgmtSvcServer) DevStateQuery(ctx context.Context, req *DevStateReq) (*DevStateResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DevStateQuery not implemented")
-}
-func (*UnimplementedMgmtSvcServer) StorageSetFaulty(ctx context.Context, req *DevStateReq) (*DevStateResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method StorageSetFaulty not implemented")
+func (*UnimplementedMgmtSvcServer) SmdQuery(ctx context.Context, req *SmdQueryReq) (*SmdQueryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SmdQuery not implemented")
 }
 func (*UnimplementedMgmtSvcServer) ListContainers(ctx context.Context, req *ListContReq) (*ListContResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListContainers not implemented")
@@ -649,6 +647,9 @@ func (*UnimplementedMgmtSvcServer) StopRanks(ctx context.Context, req *RanksReq)
 }
 func (*UnimplementedMgmtSvcServer) PingRanks(ctx context.Context, req *RanksReq) (*RanksResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PingRanks not implemented")
+}
+func (*UnimplementedMgmtSvcServer) ResetFormatRanks(ctx context.Context, req *RanksReq) (*RanksResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetFormatRanks not implemented")
 }
 func (*UnimplementedMgmtSvcServer) StartRanks(ctx context.Context, req *RanksReq) (*RanksResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartRanks not implemented")
@@ -729,6 +730,60 @@ func _MgmtSvc_PoolDestroy_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MgmtSvcServer).PoolDestroy(ctx, req.(*PoolDestroyReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MgmtSvc_PoolEvict_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PoolEvictReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MgmtSvcServer).PoolEvict(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mgmt.MgmtSvc/PoolEvict",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MgmtSvcServer).PoolEvict(ctx, req.(*PoolEvictReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MgmtSvc_PoolExclude_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PoolExcludeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MgmtSvcServer).PoolExclude(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mgmt.MgmtSvc/PoolExclude",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MgmtSvcServer).PoolExclude(ctx, req.(*PoolExcludeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MgmtSvc_PoolExtend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PoolExtendReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MgmtSvcServer).PoolExtend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mgmt.MgmtSvc/PoolExtend",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MgmtSvcServer).PoolExtend(ctx, req.(*PoolExtendReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -877,60 +932,6 @@ func _MgmtSvc_GetAttachInfo_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MgmtSvc_BioHealthQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BioHealthReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MgmtSvcServer).BioHealthQuery(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/mgmt.MgmtSvc/BioHealthQuery",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MgmtSvcServer).BioHealthQuery(ctx, req.(*BioHealthReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MgmtSvc_SmdListDevs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SmdDevReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MgmtSvcServer).SmdListDevs(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/mgmt.MgmtSvc/SmdListDevs",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MgmtSvcServer).SmdListDevs(ctx, req.(*SmdDevReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MgmtSvc_SmdListPools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SmdPoolReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MgmtSvcServer).SmdListPools(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/mgmt.MgmtSvc/SmdListPools",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MgmtSvcServer).SmdListPools(ctx, req.(*SmdPoolReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _MgmtSvc_ListPools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListPoolsReq)
 	if err := dec(in); err != nil {
@@ -949,38 +950,20 @@ func _MgmtSvc_ListPools_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MgmtSvc_DevStateQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DevStateReq)
+func _MgmtSvc_SmdQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SmdQueryReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MgmtSvcServer).DevStateQuery(ctx, in)
+		return srv.(MgmtSvcServer).SmdQuery(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/mgmt.MgmtSvc/DevStateQuery",
+		FullMethod: "/mgmt.MgmtSvc/SmdQuery",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MgmtSvcServer).DevStateQuery(ctx, req.(*DevStateReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MgmtSvc_StorageSetFaulty_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DevStateReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MgmtSvcServer).StorageSetFaulty(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/mgmt.MgmtSvc/StorageSetFaulty",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MgmtSvcServer).StorageSetFaulty(ctx, req.(*DevStateReq))
+		return srv.(MgmtSvcServer).SmdQuery(ctx, req.(*SmdQueryReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1057,6 +1040,24 @@ func _MgmtSvc_PingRanks_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MgmtSvc_ResetFormatRanks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RanksReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MgmtSvcServer).ResetFormatRanks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/mgmt.MgmtSvc/ResetFormatRanks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MgmtSvcServer).ResetFormatRanks(ctx, req.(*RanksReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MgmtSvc_StartRanks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RanksReq)
 	if err := dec(in); err != nil {
@@ -1114,6 +1115,18 @@ var _MgmtSvc_serviceDesc = grpc.ServiceDesc{
 			Handler:    _MgmtSvc_PoolDestroy_Handler,
 		},
 		{
+			MethodName: "PoolEvict",
+			Handler:    _MgmtSvc_PoolEvict_Handler,
+		},
+		{
+			MethodName: "PoolExclude",
+			Handler:    _MgmtSvc_PoolExclude_Handler,
+		},
+		{
+			MethodName: "PoolExtend",
+			Handler:    _MgmtSvc_PoolExtend_Handler,
+		},
+		{
 			MethodName: "PoolReintegrate",
 			Handler:    _MgmtSvc_PoolReintegrate_Handler,
 		},
@@ -1146,28 +1159,12 @@ var _MgmtSvc_serviceDesc = grpc.ServiceDesc{
 			Handler:    _MgmtSvc_GetAttachInfo_Handler,
 		},
 		{
-			MethodName: "BioHealthQuery",
-			Handler:    _MgmtSvc_BioHealthQuery_Handler,
-		},
-		{
-			MethodName: "SmdListDevs",
-			Handler:    _MgmtSvc_SmdListDevs_Handler,
-		},
-		{
-			MethodName: "SmdListPools",
-			Handler:    _MgmtSvc_SmdListPools_Handler,
-		},
-		{
 			MethodName: "ListPools",
 			Handler:    _MgmtSvc_ListPools_Handler,
 		},
 		{
-			MethodName: "DevStateQuery",
-			Handler:    _MgmtSvc_DevStateQuery_Handler,
-		},
-		{
-			MethodName: "StorageSetFaulty",
-			Handler:    _MgmtSvc_StorageSetFaulty_Handler,
+			MethodName: "SmdQuery",
+			Handler:    _MgmtSvc_SmdQuery_Handler,
 		},
 		{
 			MethodName: "ListContainers",
@@ -1184,6 +1181,10 @@ var _MgmtSvc_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PingRanks",
 			Handler:    _MgmtSvc_PingRanks_Handler,
+		},
+		{
+			MethodName: "ResetFormatRanks",
+			Handler:    _MgmtSvc_ResetFormatRanks_Handler,
 		},
 		{
 			MethodName: "StartRanks",
