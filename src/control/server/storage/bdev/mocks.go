@@ -41,6 +41,7 @@ type (
 		FormatErr     error
 		ScanRes       storage.NvmeControllers
 		ScanErr       error
+		UpdateErr     error
 	}
 
 	MockBackend struct {
@@ -111,6 +112,10 @@ func (mb *MockBackend) Reset() error {
 
 func (mb *MockBackend) Prepare(_ PrepareRequest) error {
 	return mb.cfg.PrepareErr
+}
+
+func (mb *MockBackend) UpdateFirmware(_ string, _ string, _ int32) error {
+	return mb.cfg.UpdateErr
 }
 
 func NewMockProvider(log logging.Logger, mbc *MockBackendConfig) *Provider {

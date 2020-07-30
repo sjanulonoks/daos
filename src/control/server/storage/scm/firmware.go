@@ -32,6 +32,15 @@ import (
 	"github.com/daos-stack/daos/src/control/server/storage"
 )
 
+const (
+	// FirmwareQueryMethod is the method name used when forwarding the request
+	// to query SCM firmware.
+	FirmwareQueryMethod = "ScmFirmwareQuery"
+	// FirmwareUpdateMethod is the method name used when forwarding the request
+	// to update SCM firmware.
+	FirmwareUpdateMethod = "ScmFirmwareUpdate"
+)
+
 type (
 	// firmwareProvider is an embedded structure that enables a Provider to
 	// forward firmware requests to a privileged binary if firmware management
@@ -180,7 +189,7 @@ func (f *FirmwareForwarder) Query(req FirmwareQueryRequest) (*FirmwareQueryRespo
 	req.Forwarded = true
 
 	res := new(FirmwareQueryResponse)
-	if err := f.SendReq("ScmFirmwareQuery", req, res); err != nil {
+	if err := f.SendReq(FirmwareQueryMethod, req, res); err != nil {
 		return nil, err
 	}
 
@@ -195,7 +204,7 @@ func (f *FirmwareForwarder) Update(req FirmwareUpdateRequest) (*FirmwareUpdateRe
 	req.Forwarded = true
 
 	res := new(FirmwareUpdateResponse)
-	if err := f.SendReq("ScmFirmwareUpdate", req, res); err != nil {
+	if err := f.SendReq(FirmwareUpdateMethod, req, res); err != nil {
 		return nil, err
 	}
 

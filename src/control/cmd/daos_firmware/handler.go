@@ -55,6 +55,7 @@ type scmQueryHandler struct {
 	scmHandler
 }
 
+// Handle queries the SCM firmware information and returns the data in a pbin.Response.
 func (h *scmQueryHandler) Handle(log logging.Logger, req *pbin.Request) *pbin.Response {
 	if req == nil {
 		return getNilRequestResp()
@@ -80,6 +81,7 @@ type scmUpdateHandler struct {
 	scmHandler
 }
 
+// Handle updates the SCM firmware and returns the result in a pbin.Response.
 func (h *scmUpdateHandler) Handle(log logging.Logger, req *pbin.Request) *pbin.Response {
 	if req == nil {
 		return getNilRequestResp()
@@ -114,4 +116,22 @@ func (h *bdevHandler) setupProvider(log logging.Logger) {
 // nvmeUpdateHandler handles a request to update the NVMe device firmware from a file.
 type nvmeUpdateHandler struct {
 	bdevHandler
+}
+
+// Handle updates the NVMe device firmware and returns the result as a pbin.Response.
+func (h *nvmeUpdateHandler) Handle(log logging.Logger, req *pbin.Request) *pbin.Response {
+	if req == nil {
+		return getNilRequestResp()
+	}
+
+	var uReq bdev.FirmwareUpdateRequest
+	if err := json.Unmarshal(req.Payload, &uReq); err != nil {
+		return pbin.NewResponseWithError(err)
+	}
+
+	h.setupProvider(log)
+
+	res, _ := h.bdevProvider.UpdateFirmware(uReq)
+
+	return pbin.NewResponseWithPayload(res)
 }
