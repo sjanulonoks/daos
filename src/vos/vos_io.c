@@ -454,7 +454,9 @@ vos_ioc_create(daos_handle_t coh, daos_unit_oid_t oid, bool read_only,
 	struct bio_io_context *bioc;
 	int i, rc;
 
-	if (iod_nr == 0) {
+	if (iod_nr == 0 &&
+	    !(fetch_flags &
+	      (VOS_FETCH_SET_TS_ONLY | VOS_FETCH_CHECK_EXISTENCE))) {
 		D_ERROR("Invalid iod_nr (0).\n");
 		rc = -DER_IO_INVAL;
 		goto error;
@@ -499,6 +501,11 @@ vos_ioc_create(daos_handle_t coh, daos_unit_oid_t oid, bool read_only,
 	if (rc != 0)
 		goto error;
 
+	if (ioc->ic_read_ts_only || ioc->ic_check_existence) {
+		*ioc_pp = ioc;
+		return 0;
+	}
+
 	cont = vos_hdl2cont(coh);
 
 	bioc = cont->vc_pool->vp_io_ctxt;
@@ -515,11 +522,6 @@ vos_ioc_create(daos_handle_t coh, daos_unit_oid_t oid, bool read_only,
 	if (ioc->ic_biov_csums == NULL) {
 		rc = -DER_NOMEM;
 		goto error;
-	}
-
-	if (ioc->ic_read_ts_only || ioc->ic_check_existence) {
-		*ioc_pp = ioc;
-		return 0;
 	}
 
 	for (i = 0; i < iod_nr; i++) {
@@ -1182,6 +1184,9 @@ update_ts_on_fetch(struct vos_io_context *ioc, int err)
 	int			 akey_idx;
 
 	if (ts_set == NULL)
+		return;
+
+	if (DAOS_FAIL_CHECK(DAOS_DTX_NO_READ_TS))
 		return;
 
 	/** Aborted for another reason, no timestamp updates */

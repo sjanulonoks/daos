@@ -469,13 +469,16 @@ obj_set_reply_sizes(crt_rpc_t *rpc)
 	struct obj_rw_in	*orw = crt_req_get(rpc);
 	struct obj_rw_out	*orwo = crt_reply_get(rpc);
 	daos_iod_t		*iods;
-	uint64_t		*sizes;
-	int			size_count;
+	uint64_t		*sizes = NULL;
+	int			size_count = 0;
 	int			i;
 
 	D_ASSERT(obj_rpc_is_fetch(rpc));
 	D_ASSERT(orwo != NULL);
 	D_ASSERT(orw != NULL);
+
+	if (orw->orw_flags & DRF_CHECK_EXISTENCE)
+		goto out;
 
 	iods = orw->orw_iod_array.oia_iods;
 	size_count = orw->orw_iod_array.oia_iod_nr;
@@ -487,7 +490,6 @@ obj_set_reply_sizes(crt_rpc_t *rpc)
 		return -DER_INVAL;
 	}
 
-	orwo->orw_iod_sizes.ca_count = size_count;
 	D_ALLOC_ARRAY(sizes, size_count);
 	if (sizes == NULL)
 		return -DER_NOMEM;
@@ -495,6 +497,8 @@ obj_set_reply_sizes(crt_rpc_t *rpc)
 	for (i = 0; i < orw->orw_iod_array.oia_iod_nr; i++)
 		sizes[i] = iods[i].iod_size;
 
+out:
+	orwo->orw_iod_sizes.ca_count = size_count;
 	orwo->orw_iod_sizes.ca_arrays = sizes;
 
 	D_DEBUG(DB_TRACE, "rpc %p set sizes count as %d for "
@@ -1293,7 +1297,7 @@ obj_local_rw(crt_rpc_t *rpc, struct obj_io_context *ioc,
 		bulk_op = CRT_BULK_PUT;
 		if (!rma && orw->orw_sgls.ca_arrays == NULL) {
 			spec_fetch = true;
-			if (orw->orw_api_flags & VOS_COND_FETCH_MASK)
+			if (orw->orw_flags & DRF_CHECK_EXISTENCE)
 				fetch_flags = VOS_FETCH_CHECK_EXISTENCE;
 			else
 				fetch_flags = VOS_FETCH_SIZE_ONLY;
@@ -1357,6 +1361,9 @@ obj_local_rw(crt_rpc_t *rpc, struct obj_io_context *ioc,
 			orwo->orw_rels.ca_count = orw->orw_nr;
 		}
 	}
+
+	if (orw->orw_flags & DRF_CHECK_EXISTENCE)
+		goto out;
 
 	biod = vos_ioh2desc(ioh);
 	rc = bio_iod_prep(biod);
@@ -1616,7 +1623,10 @@ do_obj_ioc_begin(uint32_t rpc_map_ver, uuid_t pool_uuid,
 		if (obj_is_modification_opc(opc))
 			D_GOTO(out, rc = -DER_STALE);
 		/* It is harmless if fetch with old pool map version. */
+	} else if (DAOS_FAIL_CHECK(DAOS_DTX_STALE_PM)) {
+		D_GOTO(out, rc = -DER_STALE);
 	}
+
 out:
 	dss_rpc_cntr_enter(DSS_RC_OBJ);
 	ioc->ioc_began = 1;
@@ -2930,8 +2940,14 @@ ds_obj_cpd_set_sub_result(struct obj_cpd_out *oco, int idx,
 static void
 obj_cpd_reply(crt_rpc_t *rpc, int status, uint32_t map_version)
 {
+	struct obj_cpd_in	*oci = crt_req_get(rpc);
 	struct obj_cpd_out	*oco = crt_reply_get(rpc);
 	int			 rc;
+
+	if (!(oci->oci_flags & ORF_RESEND) &&
+	    (DAOS_FAIL_CHECK(DAOS_DTX_LOST_RPC_REQUEST) ||
+	     DAOS_FAIL_CHECK(DAOS_DTX_LOST_RPC_REPLY)))
+		goto cleanup;
 
 	obj_reply_set_status(rpc, status);
 	obj_reply_map_version_set(rpc, map_version);
@@ -2943,6 +2959,7 @@ obj_cpd_reply(crt_rpc_t *rpc, int status, uint32_t map_version)
 	if (rc != 0)
 		D_ERROR("Send CPD reply failed: "DF_RC"\n", DP_RC(rc));
 
+cleanup:
 	if (oco->oco_sub_rets.ca_count != 0) {
 		D_FREE(oco->oco_sub_rets.ca_arrays);
 		oco->oco_sub_rets.ca_count = 0;
@@ -2978,6 +2995,10 @@ ds_obj_dtx_handle_one(crt_rpc_t *rpc, struct daos_cpd_sub_head *dcsh,
 	int				  rc = 0;
 	int				  i;
 	int				  j;
+
+	if (dth->dth_flags & DTE_LEADER &&
+	    DAOS_FAIL_CHECK(DAOS_DTX_RESTART))
+		D_GOTO(out, rc = -DER_TX_RESTART);
 
 	/* P1: Spread read TS. */
 	for (i = 0; i < dcde->dcde_read_cnt; i++) {
@@ -3553,6 +3574,8 @@ ds_obj_dtx_leader_ult(void *arg)
 				D_GOTO(out, rc);
 			break;
 		}
+	} else if (DAOS_FAIL_CHECK(DAOS_DTX_LOST_RPC_REQUEST)) {
+		D_GOTO(out, rc = 0);
 	}
 
 	dcde = ds_obj_cpd_get_dcde(dca->dca_rpc, dca->dca_idx, 0);

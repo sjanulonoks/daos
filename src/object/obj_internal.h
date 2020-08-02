@@ -279,13 +279,13 @@ struct shard_auxi_args {
 	uint32_t		 shard;
 	uint32_t		 target;
 	uint32_t		 map_ver;
-	uint16_t		 flags;
+	/* only for EC, the target idx [0, k + p) */
+	uint16_t		 ec_tgt_idx;
 	/* group index within the req_tgts->ort_shard_tgts */
 	uint16_t		 grp_idx;
 	/* only for EC, the start shard of the EC stripe */
 	uint32_t		 start_shard;
-	/* only for EC, the target idx [0, k + p) */
-	uint16_t		 ec_tgt_idx;
+	uint32_t		 flags;
 };
 
 struct shard_rw_args {
@@ -644,8 +644,5 @@ dc_tx_get_dti(daos_handle_t th, struct dtx_id *dti);
 
 int
 dc_tx_attach(daos_handle_t th, enum obj_rpc_opc opc, tse_task_t *task);
-
-void
-dc_tx_check_existence_cb(void *data, tse_task_t *task);
 
 #endif /* __DAOS_OBJ_INTENRAL_H__ */

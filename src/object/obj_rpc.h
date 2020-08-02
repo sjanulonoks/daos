@@ -151,6 +151,8 @@ enum obj_rpc_flags {
 	DRF_CPD_BULK		= (1 << 9),
 	/* Contain EC split req, only used on CPD leader locally. */
 	DRF_HAS_EC_SPLIT	= (1 << 10),
+	/* Checking the existence of the object/key. */
+	DRF_CHECK_EXISTENCE	= (1 << 11),
 };
 
 /* common for update/fetch */
