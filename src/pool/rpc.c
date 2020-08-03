@@ -66,44 +66,6 @@ crt_proc_struct_rsvc_hint(crt_proc_t proc, struct rsvc_hint *hint)
 	return 0;
 }
 
-static int
-crt_proc_struct_daos_pool_space(crt_proc_t proc, struct daos_pool_space *p)
-{
-	int i, rc;
-
-	for (i = 0; i < DAOS_MEDIA_MAX; i++) {
-		rc = crt_proc_uint64_t(proc, &p->ps_space.s_total[i]);
-		if (rc)
-			return -DER_HG;
-
-		rc = crt_proc_uint64_t(proc, &p->ps_space.s_free[i]);
-		if (rc)
-			return -DER_HG;
-
-		rc = crt_proc_uint64_t(proc, &p->ps_free_min[i]);
-		if (rc)
-			return -DER_HG;
-
-		rc = crt_proc_uint64_t(proc, &p->ps_free_max[i]);
-		if (rc)
-			return -DER_HG;
-
-		rc = crt_proc_uint64_t(proc, &p->ps_free_mean[i]);
-		if (rc)
-			return -DER_HG;
-	}
-
-	rc = crt_proc_uint32_t(proc, &p->ps_ntargets);
-	if (rc)
-		return -DER_HG;
-
-	rc = crt_proc_uint32_t(proc, &p->ps_padding);
-	if (rc)
-		return -DER_HG;
-
-	return 0;
-}
-
 CRT_RPC_DEFINE(pool_op, DAOS_ISEQ_POOL_OP, DAOS_OSEQ_POOL_OP)
 CRT_RPC_DEFINE(pool_create, DAOS_ISEQ_POOL_CREATE, DAOS_OSEQ_POOL_CREATE)
 CRT_RPC_DEFINE(pool_connect, DAOS_ISEQ_POOL_CONNECT, DAOS_OSEQ_POOL_CONNECT)
