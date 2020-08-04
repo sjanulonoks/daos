@@ -239,7 +239,7 @@ func TestControl_DeviceType_toCtlPBType(t *testing.T) {
 }
 
 func TestControl_FirmwareUpdate(t *testing.T) {
-	pbResults := []*ctlpb.ScmFirmwareUpdateResp{
+	pbSCMResults := []*ctlpb.ScmFirmwareUpdateResp{
 		{
 			Module: &ctlpb.ScmModule{
 				Uid:             "TestUid1",
@@ -266,8 +266,8 @@ func TestControl_FirmwareUpdate(t *testing.T) {
 		},
 	}
 
-	expResults := make([]*SCMUpdateResult, 0, len(pbResults))
-	for _, pbRes := range pbResults {
+	expSCMResults := make([]*SCMUpdateResult, 0, len(pbSCMResults))
+	for _, pbRes := range pbSCMResults {
 		res := &SCMUpdateResult{}
 		if err := convert.Types(pbRes.Module, &res.Module); err != nil {
 			t.Fatalf("couldn't set up expected results: %v", err)
@@ -276,7 +276,30 @@ func TestControl_FirmwareUpdate(t *testing.T) {
 			res.Error = errors.New(pbRes.Error)
 		}
 
-		expResults = append(expResults, res)
+		expSCMResults = append(expSCMResults, res)
+	}
+
+	pbNVMeResults := []*ctlpb.NvmeFirmwareUpdateResp{
+		{
+			PciAddr: "TestDev1",
+			Error:   "a surprising failure occurred",
+		},
+		{
+			PciAddr: "TestDev2",
+			Error:   "",
+		},
+	}
+
+	expNVMeResults := make([]*NVMeUpdateResult, 0, len(pbNVMeResults))
+	for _, pbRes := range pbNVMeResults {
+		res := &NVMeUpdateResult{
+			DevicePCIAddr: pbRes.PciAddr,
+		}
+		if pbRes.Error != "" {
+			res.Error = errors.New(pbRes.Error)
+		}
+
+		expNVMeResults = append(expNVMeResults, res)
 	}
 
 	for name, tc := range map[string]struct {
@@ -334,12 +357,28 @@ func TestControl_FirmwareUpdate(t *testing.T) {
 			},
 			mic: &MockInvokerConfig{
 				UnaryResponse: MockMSResponse("host1", nil, &ctlpb.FirmwareUpdateResp{
-					ScmResults: pbResults,
+					ScmResults: pbSCMResults,
 				}),
 			},
 			expResp: &FirmwareUpdateResp{
 				HostSCMResult: map[string][]*SCMUpdateResult{
-					"host1": expResults,
+					"host1": expSCMResults,
+				},
+			},
+		},
+		"NVMe success": {
+			req: &FirmwareUpdateReq{
+				Type:         DeviceTypeNVMe,
+				FirmwarePath: "/my/path",
+			},
+			mic: &MockInvokerConfig{
+				UnaryResponse: MockMSResponse("host1", nil, &ctlpb.FirmwareUpdateResp{
+					NvmeResults: pbNVMeResults,
+				}),
+			},
+			expResp: &FirmwareUpdateResp{
+				HostNVMeResult: map[string][]*NVMeUpdateResult{
+					"host1": expNVMeResults,
 				},
 			},
 		},

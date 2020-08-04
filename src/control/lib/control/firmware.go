@@ -172,10 +172,21 @@ type (
 		Error  error
 	}
 
+	// HostNVMeUpdateMap maps a host name to a slice of NVMe update results.
+	HostNVMeUpdateMap map[string][]*NVMeUpdateResult
+
+	// NVMeUpdateResult represents the results of a firmware update for a
+	// single NVMe device.
+	NVMeUpdateResult struct {
+		DevicePCIAddr string
+		Error         error
+	}
+
 	// FirmwareUpdateResp returns the results of firmware update operations.
 	FirmwareUpdateResp struct {
 		HostErrorsResp
-		HostSCMResult HostSCMUpdateMap
+		HostSCMResult  HostSCMUpdateMap
+		HostNVMeResult HostNVMeUpdateMap
 	}
 )
 
@@ -201,29 +212,65 @@ func (t DeviceType) toCtlPBType() (ctlpb.FirmwareUpdateReq_DeviceType, error) {
 }
 
 func (ur *FirmwareUpdateResp) addHostResponse(hr *HostResponse) error {
-	if ur.HostSCMResult == nil {
-		ur.HostSCMResult = make(HostSCMUpdateMap)
-	}
-
 	pbResp, ok := hr.Message.(*ctlpb.FirmwareUpdateResp)
 	if !ok {
 		return errors.Errorf("unable to unpack message: %+v", hr.Message)
 	}
 
-	scmResults := make([]*SCMUpdateResult, 0, len(pbResp.ScmResults))
-
-	for _, pbScmRes := range pbResp.ScmResults {
-		devResult := &SCMUpdateResult{}
-		if err := convert.Types(pbScmRes.Module, &devResult.Module); err != nil {
-			return errors.Wrapf(err, "unable to convert module")
-		}
-		if pbScmRes.Error != "" {
-			devResult.Error = errors.New(pbScmRes.Error)
-		}
-		scmResults = append(scmResults, devResult)
+	err := ur.addHostSCMResults(hr.Addr, pbResp)
+	if err != nil {
+		return err
 	}
 
-	ur.HostSCMResult[hr.Addr] = scmResults
+	return ur.addHostNVMeResults(hr.Addr, pbResp)
+}
+
+func (ur *FirmwareUpdateResp) addHostSCMResults(hostAddr string, pbResp *ctlpb.FirmwareUpdateResp) error {
+	if len(pbResp.ScmResults) > 0 {
+		if ur.HostSCMResult == nil {
+			ur.HostSCMResult = make(HostSCMUpdateMap)
+		}
+
+		scmResults := make([]*SCMUpdateResult, 0, len(pbResp.ScmResults))
+
+		for _, pbRes := range pbResp.ScmResults {
+			devResult := &SCMUpdateResult{}
+			if err := convert.Types(pbRes.Module, &devResult.Module); err != nil {
+				return errors.Wrapf(err, "unable to convert module")
+			}
+			if pbRes.Error != "" {
+				devResult.Error = errors.New(pbRes.Error)
+			}
+			scmResults = append(scmResults, devResult)
+		}
+
+		ur.HostSCMResult[hostAddr] = scmResults
+	}
+
+	return nil
+}
+
+func (ur *FirmwareUpdateResp) addHostNVMeResults(hostAddr string, pbResp *ctlpb.FirmwareUpdateResp) error {
+	if len(pbResp.NvmeResults) > 0 {
+		if ur.HostNVMeResult == nil {
+			ur.HostNVMeResult = make(HostNVMeUpdateMap)
+		}
+
+		nvmeResults := make([]*NVMeUpdateResult, 0, len(pbResp.NvmeResults))
+
+		for _, pbRes := range pbResp.NvmeResults {
+			devResult := &NVMeUpdateResult{
+				DevicePCIAddr: pbRes.PciAddr,
+			}
+			if pbRes.Error != "" {
+				devResult.Error = errors.New(pbRes.Error)
+			}
+			nvmeResults = append(nvmeResults, devResult)
+		}
+
+		ur.HostNVMeResult[hostAddr] = nvmeResults
+	}
+
 	return nil
 }
 

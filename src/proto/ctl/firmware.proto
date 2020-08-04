@@ -58,6 +58,12 @@ message ScmFirmwareUpdateResp {
 	string error = 2; // empty if successful
 }
 
+message NvmeFirmwareUpdateResp {
+	string pciAddr = 1; // PCI address of the NVMe device
+	string error = 2; // empty if successful
+}
+
 message FirmwareUpdateResp {
 	repeated ScmFirmwareUpdateResp scmResults = 1; // results for SCM update
+	repeated NvmeFirmwareUpdateResp nvmeResults = 2; // results for NVMe update
 }
