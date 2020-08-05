@@ -239,68 +239,8 @@ func TestControl_DeviceType_toCtlPBType(t *testing.T) {
 }
 
 func TestControl_FirmwareUpdate(t *testing.T) {
-	pbSCMResults := []*ctlpb.ScmFirmwareUpdateResp{
-		{
-			Module: &ctlpb.ScmModule{
-				Uid:             "TestUid1",
-				Capacity:        (1 << 20),
-				Physicalid:      1,
-				Socketid:        2,
-				Controllerid:    3,
-				Channelid:       4,
-				Channelposition: 5,
-			},
-			Error: "",
-		},
-		{
-			Module: &ctlpb.ScmModule{
-				Uid:             "TestUid2",
-				Capacity:        (1 << 21),
-				Physicalid:      6,
-				Socketid:        7,
-				Controllerid:    8,
-				Channelid:       9,
-				Channelposition: 10,
-			},
-			Error: "something went wrong",
-		},
-	}
-
-	expSCMResults := make([]*SCMUpdateResult, 0, len(pbSCMResults))
-	for _, pbRes := range pbSCMResults {
-		res := &SCMUpdateResult{}
-		if err := convert.Types(pbRes.Module, &res.Module); err != nil {
-			t.Fatalf("couldn't set up expected results: %v", err)
-		}
-		if pbRes.Error != "" {
-			res.Error = errors.New(pbRes.Error)
-		}
-
-		expSCMResults = append(expSCMResults, res)
-	}
-
-	pbNVMeResults := []*ctlpb.NvmeFirmwareUpdateResp{
-		{
-			PciAddr: "TestDev1",
-			Error:   "a surprising failure occurred",
-		},
-		{
-			PciAddr: "TestDev2",
-			Error:   "",
-		},
-	}
-
-	expNVMeResults := make([]*NVMeUpdateResult, 0, len(pbNVMeResults))
-	for _, pbRes := range pbNVMeResults {
-		res := &NVMeUpdateResult{
-			DevicePCIAddr: pbRes.PciAddr,
-		}
-		if pbRes.Error != "" {
-			res.Error = errors.New(pbRes.Error)
-		}
-
-		expNVMeResults = append(expNVMeResults, res)
-	}
+	pbSCMResults, expSCMResults := getTestSCMUpdateResults(t)
+	pbNVMeResults, expNVMeResults := getTestNVMeUpdateResults(t)
 
 	for name, tc := range map[string]struct {
 		mic     *MockInvokerConfig
@@ -406,4 +346,75 @@ func TestControl_FirmwareUpdate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func getTestSCMUpdateResults(t *testing.T) ([]*ctlpb.ScmFirmwareUpdateResp, []*SCMUpdateResult) {
+	pbSCMResults := []*ctlpb.ScmFirmwareUpdateResp{
+		{
+			Module: &ctlpb.ScmModule{
+				Uid:             "TestUid1",
+				Capacity:        (1 << 20),
+				Physicalid:      1,
+				Socketid:        2,
+				Controllerid:    3,
+				Channelid:       4,
+				Channelposition: 5,
+			},
+			Error: "",
+		},
+		{
+			Module: &ctlpb.ScmModule{
+				Uid:             "TestUid2",
+				Capacity:        (1 << 21),
+				Physicalid:      6,
+				Socketid:        7,
+				Controllerid:    8,
+				Channelid:       9,
+				Channelposition: 10,
+			},
+			Error: "something went wrong",
+		},
+	}
+
+	expSCMResults := make([]*SCMUpdateResult, 0, len(pbSCMResults))
+	for _, pbRes := range pbSCMResults {
+		res := &SCMUpdateResult{}
+		if err := convert.Types(pbRes.Module, &res.Module); err != nil {
+			t.Fatalf("couldn't set up expected results: %v", err)
+		}
+		if pbRes.Error != "" {
+			res.Error = errors.New(pbRes.Error)
+		}
+
+		expSCMResults = append(expSCMResults, res)
+	}
+
+	return pbSCMResults, expSCMResults
+}
+
+func getTestNVMeUpdateResults(t *testing.T) ([]*ctlpb.NvmeFirmwareUpdateResp, []*NVMeUpdateResult) {
+	pbNVMeResults := []*ctlpb.NvmeFirmwareUpdateResp{
+		{
+			PciAddr: "TestDev1",
+			Error:   "a surprising failure occurred",
+		},
+		{
+			PciAddr: "TestDev2",
+			Error:   "",
+		},
+	}
+
+	expNVMeResults := make([]*NVMeUpdateResult, 0, len(pbNVMeResults))
+	for _, pbRes := range pbNVMeResults {
+		res := &NVMeUpdateResult{
+			DevicePCIAddr: pbRes.PciAddr,
+		}
+		if pbRes.Error != "" {
+			res.Error = errors.New(pbRes.Error)
+		}
+
+		expNVMeResults = append(expNVMeResults, res)
+	}
+
+	return pbNVMeResults, expNVMeResults
 }

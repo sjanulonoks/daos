@@ -917,3 +917,35 @@ Errors:
 		})
 	}
 }
+
+// func TestPretty_PrintNVMeFirmwareUpdateMap(t *testing.T) {
+// 	for name, tc := range map[string]struct {
+// 		fwMap       control.HostNVMeUpdateMap
+// 		hostErrors  control.HostErrorsMap
+// 		expPrintStr string
+// 	}{
+// 		"no devices": {
+// 			fwMap: control.HostNVMeUpdateMap{
+// 				"host1": []*control.NVMeUpdateResult{},
+// 				"host2": []*control.NVMeUpdateResult{},
+// 			},
+// 			expPrintStr: `
+// ---------
+// host[1-2]
+// ---------
+//   No SCM devices detected
+// `,
+// 		},
+// 	} {
+// 		t.Run(name, func(t *testing.T) {
+// 			var bld strings.Builder
+// 			if err := PrintNVMeFirmwareUpdateMap(tc.fwMap, &bld); err != nil {
+// 				t.Fatal(err)
+// 			}
+
+// 			if diff := cmp.Diff(strings.TrimLeft(tc.expPrintStr, "\n"), bld.String()); diff != "" {
+// 				t.Fatalf("unexpected format string (-want, +got):\n%s\n", diff)
+// 			}
+// 		})
+// 	}
+// }

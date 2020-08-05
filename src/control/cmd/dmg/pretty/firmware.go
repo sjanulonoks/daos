@@ -41,6 +41,7 @@ import (
 const (
 	scmUpdateSuccess = "Success - The new firmware was staged. A power cycle is required to apply."
 	scmNotFound      = "No SCM devices detected"
+	nvmeNotFound     = "No NVMe device controllers detected"
 	errorPrefix      = "Error"
 )
 
@@ -108,10 +109,39 @@ func (m hostDeviceResultMap) Keys() []string {
 	return keys
 }
 
+// hostDeviceError is an error associated with a specific host and device ID
 type hostDeviceError struct {
 	Host  string
 	Error error
 	DevID string
+}
+
+// scmQueryResult lets us define new methods for printing nicely.
+type scmQueryResult control.SCMQueryResult
+
+func (sqr *scmQueryResult) isSuccess() bool {
+	return sqr.Error == nil
+}
+
+func (sqr *scmQueryResult) resultString() string {
+	if sqr.Error == nil {
+		var b strings.Builder
+		printSCMFirmwareInfo(sqr.Info, &b)
+		return b.String()
+	}
+	return sqr.Error.Error()
+}
+
+func (sqr *scmQueryResult) resultError() error {
+	return sqr.Error
+}
+
+func (sqr *scmQueryResult) device() string {
+	return getShortSCMString(sqr.Module)
+}
+
+func (sqr *scmQueryResult) deviceDetails() string {
+	return sqr.Module.String()
 }
 
 // PrintSCMFirmwareQueryMap formats the firmware query results in a condensed format.
@@ -143,23 +173,25 @@ func condenseSCMQueryMap(fwMap control.HostSCMQueryMap) (hostDeviceResultMap, []
 		}
 
 		for _, devRes := range results {
-			if devRes.Error == nil {
-				var b strings.Builder
-				printSCMFirmwareInfo(devRes.Info, &b)
-				err := successes.AddHostDevice(b.String(), host, devRes.Module.String())
+			if devRes.isSuccess() {
+				err := successes.AddHostDevice(devRes.resultString(), host, devRes.deviceDetails())
 				if err != nil {
 					return nil, nil, err
 				}
-			} else {
-				errors = append(errors, hostDeviceError{
-					Host:  host,
-					DevID: getShortSCMString(devRes.Module),
-					Error: devRes.Error,
-				})
+				continue
 			}
+			errors = append(errors, hostDeviceError{
+				Host:  host,
+				DevID: devRes.device(),
+				Error: devRes.resultError(),
+			})
 		}
 	}
 	return successes, errors, nil
+}
+
+func getDeviceStringFromResult(devRes interface{}) string {
+
 }
 
 func printSCMFirmwareInfo(info *storage.ScmFirmwareInfo, out io.Writer) {
@@ -317,14 +349,13 @@ func condenseSCMUpdateMap(fwMap control.HostSCMUpdateMap) (hostDeviceResultMap, 
 				if err != nil {
 					return nil, nil, err
 				}
-			} else {
-				errors = append(errors, hostDeviceError{
-					Host:  host,
-					DevID: getShortSCMString(devRes.Module),
-					Error: devRes.Error,
-				})
+				continue
 			}
-
+			errors = append(errors, hostDeviceError{
+				Host:  host,
+				DevID: getShortSCMString(devRes.Module),
+				Error: devRes.Error,
+			})
 		}
 	}
 	return successes, errors, nil
@@ -388,3 +419,43 @@ func PrintSCMFirmwareUpdateMapVerbose(fwMap control.HostSCMUpdateMap, out io.Wri
 
 	return w.Err
 }
+
+// // PrintNVMeFirmwareUpdateMap formats the NVMe device firmware update results in
+// // a concise format.
+// func PrintNVMeFirmwareUpdateMap(fwMap control.HostNVMeUpdateMap, out io.Writer,
+// 	opts ...control.PrintConfigOption) error {
+// 	successes, errors, err := condenseNVMeUpdateMap(fwMap)
+
+// }
+
+// func condenseNVMeUpdateMap(fwMap control.HostNVMeUpdateMap) (hostDeviceResultMap, []hostDeviceError, error) {
+// 	successes := make(hostDeviceResultMap)
+// 	errors := make([]hostDeviceError, 0)
+// 	for _, host := range fwMap.Keys() {
+// 		results := fwMap[host]
+// 		if len(results) == 0 {
+// 			err := successes.AddHost(nvmeNotFound, host)
+// 			if err != nil {
+// 				return nil, nil, err
+// 			}
+// 			continue
+// 		}
+
+// 		// for _, devRes := range results {
+// 		// 	if devRes.Error == nil {
+// 		// 		err := successes.AddHostDevice(scmUpdateSuccess, host, devRes.Module.String())
+// 		// 		if err != nil {
+// 		// 			return nil, nil, err
+// 		// 		}
+// 		// 	} else {
+// 		// 		errors = append(errors, hostDeviceError{
+// 		// 			Host:  host,
+// 		// 			DevID: getShortSCMString(devRes.Module),
+// 		// 			Error: devRes.Error,
+// 		// 		})
+// 		// 	}
+
+// 		// }
+// 	}
+// 	return successes, errors, nil
+// }
