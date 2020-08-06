@@ -274,8 +274,18 @@ func (ur *FirmwareUpdateResp) addHostNVMeResults(hostAddr string, pbResp *ctlpb.
 	return nil
 }
 
-// Keys returns the sorted list of keys from the map.
+// Keys returns the sorted list of keys from the SCM result map.
 func (m HostSCMUpdateMap) Keys() []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// Keys returns the sorted list of keys from the NVMe result map.
+func (m HostNVMeUpdateMap) Keys() []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
